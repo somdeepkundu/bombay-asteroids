@@ -1,69 +1,102 @@
 # Bombay Asteroids
 
-A high-octane arcade shooter with infinite procedural difficulty, built with vanilla HTML, CSS, and JavaScript. Pilot your spaceship above Mumbai, dodge and destroy asteroids, and survive the countdown timer.
+A browser-based shoot'em'up game built with **vanilla HTML, CSS, and JavaScript** — no canvas, no frameworks, no external dependencies. Dodge and destroy oncoming asteroids above Mumbai before they drain your health!
+
+<p align="center">
+  <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" />
+  <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white" />
+  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" />
+  <img src="https://img.shields.io/badge/Leaflet-199900?style=for-the-badge&logo=leaflet&logoColor=white" />
+</p>
 
 **Live:** [bombay-asteroids.streamlit.app](https://bombay-asteroids.streamlit.app/)  
 **GitHub Pages:** [somdeepkundu.github.io/bombay-asteroids](https://somdeepkundu.github.io/bombay-asteroids/)
 
 ---
 
-## Features
+## Gameplay
 
-🎮 **Infinite Procedural Difficulty**
-- Levels scale forever — no ceiling
-- Each level: more asteroids, faster speeds, wilder angles
-- Countdown timer shrinks per level (52s → 10s floor)
-
-🗺️ **Leaflet Map Background**
-- Game world centered on IIT Bombay, Mumbai
-- Dark tile layer with parallax drift effect (simulates forward flight)
-- Map panning speed scales with level
-
-🎯 **Arcade Mechanics**
-- Circle-based collision detection (accurate and fast)
-- Delta-time physics (frame-rate independent)
-- Health powerups spawn every 15 seconds
-- Neon HUD: health bar, score, level, timer
-
-✨ **Polish**
-- Spaceship logo that floats above the title
-- Level-up flash banner with glow effect
-- Colorful timer that pulses red when ≤10s
-- Smooth animations throughout
+<table>
+  <tr>
+    <td width="50%">
+      <h3>Controls</h3>
+      <table>
+        <tr><td><kbd>W</kbd> / <kbd>↑</kbd></td><td>Move up</td></tr>
+        <tr><td><kbd>A</kbd> / <kbd>←</kbd></td><td>Move left</td></tr>
+        <tr><td><kbd>S</kbd> / <kbd>↓</kbd></td><td>Move down</td></tr>
+        <tr><td><kbd>D</kbd> / <kbd>→</kbd></td><td>Move right</td></tr>
+        <tr><td><kbd>SPACE</kbd></td><td>Fire shot</td></tr>
+      </table>
+    </td>
+    <td width="50%">
+      <h3>Objective</h3>
+      <ul>
+        <li>Pilot your spaceship to dodge incoming asteroids</li>
+        <li>Shoot asteroids to destroy them and earn <strong>+10 points</strong> each</li>
+        <li>Survive the countdown timer — each level has a time limit</li>
+        <li>Game ends when health reaches zero or timer runs out</li>
+      </ul>
+    </td>
+  </tr>
+</table>
 
 ---
 
-## How to Play
+## Features
 
-### Controls
+- **Infinite procedural difficulty** — 6+ levels generated on the fly, with no ceiling. Each level increases asteroid count, speed, and introduces chaotic directional angles
+- **Leaflet.js map background** — game world centered on IIT Bombay, Mumbai with parallax drift effect (simulates forward flight)
+- **Neon arcade theme** — synthwave-inspired CSS with glowing text, animated starfield, and pulsing HUD elements
+- **Smooth movement** — delta-time based physics for consistent speed across all frame rates
+- **Shooting mechanics** — fire green plasma bolts to destroy asteroids before they hit you
+- **Collision detection** — circle-based distance calculations for spaceship-asteroid and shot-asteroid interactions
+- **Health & scoring system** — gradient health bar, zero-padded score, level indicator, and countdown timer
+- **Countdown timer** — per-level time pressure that shrinks as you advance; time out = game over
+- **Health powerups** — spawn every 15 seconds to restore health (max 100 HP)
+- **Game over screen** — dramatic overlay showing final score, level reached, and credits
 
-| Key | Action |
-|---|---|
-| **W** / **↑** | Move up |
-| **A** / **←** | Move left |
-| **S** / **↓** | Move down |
-| **D** / **→** | Move right |
-| **SPACE** | Fire shot |
+---
 
-### Objective
+## Difficulty Progression
 
-1. **Dodge incoming asteroids** — collisions drain health
-2. **Shoot asteroids** — each kill = **+10 points**
-3. **Survive the countdown** — every level has a time limit
-4. **Advance levels** — higher scores unlock harder challenges
-5. **Stay alive** — health reaches 0 or timer runs out = **GAME OVER**
+The game generates difficulty on the fly — no hardcoded level caps.
 
-### Difficulty Progression
+| Level | Score to reach | Time limit | Asteroids | Horizontal drift | Speed range |
+|---|---|---|---|---|---|
+| 1 | 0 | 52s | 3 | Straight | 50–100 px/s |
+| 2 | 50 | 48s | 5 | Straight | 65–130 px/s |
+| 3 | 130 | 44s | 7 | ±60 px/s | 80–160 px/s |
+| 4 | 250 | 40s | 9 | ±120 px/s | 95–195 px/s |
+| 5 | 410 | 36s | 11 | ±180 px/s | 115–225 px/s |
+| 6 | 620 | 32s | 13 | ±250 px/s | 135–260 px/s |
+| 7+ | — | 10s floor | up to 32 | Chaotic | Increasing speed |
 
-| Level | Score | Time | Asteroids | Horizontal Speed |
-|---|---|---|---|---|
-| 1 | 0 | 52s | 3 | Straight |
-| 2 | 50 | 48s | 5 | Straight |
-| 3 | 130 | 44s | 7 | ±60 px/s |
-| 4 | 250 | 40s | 9 | ±120 px/s |
-| 5 | 410 | 36s | 11 | ±180 px/s |
-| 6 | 620 | 32s | 13 | ±250 px/s |
-| 7+ | — | 10s floor | up to 32 | Increasingly chaotic |
+---
+
+## How to Run
+
+No build tools or servers needed.
+
+### Option 1: Open directly in browser
+
+```bash
+git clone https://github.com/somdeepkundu/bombay-asteroids.git
+cd bombay-asteroids
+
+open index.html          # macOS
+start index.html         # Windows
+```
+
+### Option 2: Local server (optional)
+
+```bash
+python -m http.server 8000
+# Then visit http://localhost:8000
+```
+
+### Option 3: Streamlit Cloud (live)
+
+Visit **[bombay-asteroids.streamlit.app](https://bombay-asteroids.streamlit.app/)** — auto-deploys on every push.
 
 ---
 
@@ -71,13 +104,13 @@ A high-octane arcade shooter with infinite procedural difficulty, built with van
 
 ```
 bombay-asteroids/
-├── index.html              # Game markup — gamefield, HUD, start screen, instructions
-├── script.js               # Game engine — movement, physics, collision, procedural levels
-├── style.css               # Neon arcade theme — glows, animations, responsive layout
-├── app.py                  # Streamlit wrapper (bundles everything for Cloud deployment)
-├── requirements.txt        # Python dependencies for Streamlit
-├── README.md               # This file
-└── assets/graphics/        # SVG sprites
+├── index.html
+├── script.js
+├── style.css
+├── app.py
+├── requirements.txt
+├── README.md
+└── assets/graphics/
     ├── spaceship_full.svg
     ├── asteroid1.svg
     ├── asteroid2.svg
@@ -87,89 +120,43 @@ bombay-asteroids/
 
 ---
 
-## Deployment
+## Learning Journey
 
-### GitHub Pages (Static)
+Built as a hands-on extension of **"Problem Solving with Abstraction"** by [Programming 2.0](https://www.youtube.com/@programming2point0).
 
-Push to `main` branch → GitHub automatically builds and serves from `/` (root).
+Started with [programming2point0/asteroids](https://github.com/programming2point0/asteroids), then added:
+- Leaflet.js map integration with parallax drift
+- Infinite procedural difficulty generation
+- Per-level countdown timer mechanic
+- Asteroid directional angles (introduces complexity)
+- Health powerups (resource management)
+- Streamlit Cloud deployment (bundled assets)
 
-Live at: `https://somdeepkundu.github.io/bombay-asteroids/`
-
-### Streamlit Cloud (Dynamic)
-
-1. Sign in to [share.streamlit.io](https://share.streamlit.io) with GitHub
-2. Click **New app** → select this repo, branch `main`, file `app.py`
-3. Auto-deploys on every push
-
-Live at: `https://somdeepkundu-bombay-asteroids-app-XXXX.streamlit.app/`
-
----
-
-## Technical Highlights
-
-**Game Loop**
-- `requestAnimationFrame` for smooth 60 FPS
-- Delta-time based physics (frame-rate independent)
-- Accumulator pattern for sub-pixel accuracy
-
-**Difficulty**
-- Procedurally generated per level using a scaling function
-- Asteroid count, speed range, horizontal drift, and timer all linked to score thresholds
-- No hardcoded level caps — difficulty grows forever
-
-**Collision Detection**
-- Euclidean distance vs. combined radii (circle-based)
-- O(n) checks per frame (acceptable for 30 asteroids)
-- Responsive feedback (explosions, score, health drain)
-
-**Assets**
-- All sprites inline as SVG or base64 data URIs (no external asset folder)
-- Works offline after first load
-- Streamlit-safe: relative paths rewritten to base64 for iframe sandboxing
-
-**Neon Aesthetics**
-- CSS custom properties for consistent color tokens
-- Glowing text shadows on interactive elements
-- Smooth transitions and animations throughout
-- Dark mode by default (high contrast, easy on eyes)
-
----
-
-## Learning & Attribution
-
-This project was built as a hands-on exercise following **"Problem Solving with Abstraction"** by [Programming 2.0](https://www.youtube.com/@programming2point0) (YouTube).
-
-### Concepts Practiced
+### Key concepts
 
 | Concept | Applied to |
 |---|---|
-| **Abstraction** | Functions separated by responsibility (movement, shooting, collision, rendering) |
-| **Game loop pattern** | `requestAnimationFrame` + delta-time for consistent game speed |
-| **Physics** | Velocity-based movement, collision response, accumulator for precision |
-| **Procedural generation** | Infinite level scaling without hardcoded arrays |
-| **DOM manipulation** | Dynamic element creation/removal (shots, asteroids, explosions) |
-| **Event handling** | Keyboard input with state tracking and auto-repeat prevention |
-| **CSS animations** | Keyframes for spinning asteroids, pulsing UI, level-up flashes |
+| **Abstraction** | Modular game functions (moveShip, moveAsteroids, fireShot, driftMap) |
+| **Game loop** | requestAnimationFrame + delta-time physics |
+| **Procedural generation** | getLevelConfig(level) scales difficulty forever |
+| **Collision detection** | Euclidean distance vs. combined radii (circle-based) |
+| **Physics** | Velocity-based movement with sub-pixel accuracy |
+| **Deployment** | GitHub Pages (static) + Streamlit Cloud (dynamic) |
 
 ---
 
 ## Credits
 
-- **Developer:** Somdeep Kundu · [@RuDRA Lab](https://github.com/somdeepkundu), C-TARA, IIT Bombay
-- **Tutorial:** [Programming 2.0](https://www.youtube.com/@programming2point0) — *Problem Solving with Abstraction*
-- **Graphics:** Free assets from [FreePik](https://www.freepik.com/)
+- **Developed by**: Somdeep Kundu · [@RuDRA Lab](https://github.com/somdeepkundu), C-TARA, IIT Bombay
+- **Tutorial by**: [Programming 2.0](https://www.youtube.com/@programming2point0) (YouTube)
+- **Base repo**: [programming2point0/asteroids](https://github.com/programming2point0/asteroids)
+- **Graphics**: Free assets from [FreePik](https://www.freepik.com/)
   - [Asteroids](https://www.freepik.com/free-vector/asteroid-space-scene-background_5184427.htm)
   - [Spaceship](https://www.freepik.com/free-vector/futuristic-spaceship-collection-with-flat-design_2898815.htm)
-  - [Shots](https://www.freepik.com/free-vector/game-handgun-blaster-shoot-light-effect_133958192.htm)
-  - [Explosion](https://www.freepik.com/free-vector/cartoon-bomb-explosion-storyboard-animation_20902933.htm)
-- **Map Tiles:** [Stadia Maps](https://stadiamaps.com/) (Dark mode background)
-- **Framework:** [Leaflet.js](https://leafletjs.com/) (Map rendering)
-
----
-
-## License
-
-MIT — feel free to fork, modify, and deploy!
+  - [Shots](https://www.freepik.com/free-vector/game-handgun-blaster-shoot-light-effect_133958192.htm) by upklyak
+  - [Explosion](https://www.freepik.com/free-vector/cartoon-bomb-explosion-storyboard-animation_20902933.htm) by upklyak
+- **Map tiles**: [Stadia Maps](https://stadiamaps.com/)
+- **Framework**: [Leaflet.js](https://leafletjs.com/)
 
 ---
 
