@@ -5,6 +5,7 @@ import base64
 
 st.set_page_config(
     page_title="Bombay Asteroids",
+    page_icon="assets/graphics/spaceship_full.svg",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
