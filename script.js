@@ -1,19 +1,20 @@
 // ─────────────────────────────────────────────────────
 //  Bombay Asteroids  —  fully self-contained build
 //  All graphics are inline SVG data-URIs; no external
-//  asset folder required.
+//  asset folder required. Drop the three files into any
+//  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.1.0";
+const VERSION = "v2.1.1";
 
 const EXPLOSION_SVG = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'><circle cx='30' cy='30' r='28' fill='%23ff7b00' opacity='0.7'/><circle cx='30' cy='30' r='18' fill='%23ffd60a' opacity='0.9'/><circle cx='30' cy='30' r='9' fill='%23ffffff' opacity='0.95'/><polygon points='30,0 34,24 58,30 34,36 30,60 26,36 2,30 26,24' fill='%23ff006e' opacity='0.55'/></svg>`;
 
 const HEALTH_SVG = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='5' fill='%23001a00' opacity='0.7'/><path d='M19 10.5H13.5V5H10.5V10.5H5V13.5H10.5V19H13.5V13.5H19V10.5Z' fill='%2339ff14'/></svg>`;
 
-// Clock face + "+" symbol (time booster)
+// Clock (left) + plus sign (right) = time boost pickup
 const TIMEBOOST_SVG = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230a0a2e' opacity='0.9'/><circle cx='14' cy='19' r='9' fill='none' stroke='%2300fff5' stroke-width='2'/><line x1='14' y1='15' x2='14' y2='19' stroke='%2300fff5' stroke-width='2.5' stroke-linecap='round'/><line x1='14' y1='19' x2='17' y2='21' stroke='%2300fff5' stroke-width='2.5' stroke-linecap='round'/><line x1='26' y1='8' x2='26' y2='14' stroke='%2300fff5' stroke-width='2.5' stroke-linecap='round'/><line x1='23' y1='11' x2='29' y2='11' stroke='%2300fff5' stroke-width='2.5' stroke-linecap='round'/></svg>`;
 
-// Asset paths (real SVG files)
+// Asset paths (real SVG files from abstract-asteroids)
 const ASSETS = {
   spaceship: 'assets/graphics/spaceship_full.svg',
   asteroid1: 'assets/graphics/asteroid1.svg',
@@ -21,6 +22,101 @@ const ASSETS = {
   shot:      'assets/graphics/green_projectile.svg',
   explosion: 'assets/graphics/explosion.svg',
 };
+
+// ── Audio system (Web Audio API, fully procedural) ───
+let audioCtx   = null;
+let soundMuted = false;
+let _lastLaser = 0;
+
+function _ctx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function toggleMute() {
+  soundMuted = !soundMuted;
+  const btn = document.getElementById('mute-btn');
+  if (btn) btn.textContent = soundMuted ? '🔇' : '🔊';
+}
+
+function playLaser() {
+  if (soundMuted) return;
+  const ctx = _ctx(), now = ctx.currentTime;
+  if (now - _lastLaser < 0.08) return;   // throttle during auto-fire
+  _lastLaser = now;
+  const osc = ctx.createOscillator(), g = ctx.createGain();
+  osc.connect(g); g.connect(ctx.destination);
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(880, now);
+  osc.frequency.exponentialRampToValueAtTime(110, now + 0.14);
+  g.gain.setValueAtTime(0.22, now);
+  g.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+  osc.start(now); osc.stop(now + 0.14);
+}
+
+function playExplosion() {
+  if (soundMuted) return;
+  const ctx = _ctx(), now = ctx.currentTime;
+  const len = Math.floor(ctx.sampleRate * 0.45);
+  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const d   = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+  const src = ctx.createBufferSource(); src.buffer = buf;
+  const flt = ctx.createBiquadFilter(); flt.type = 'lowpass';
+  flt.frequency.setValueAtTime(500, now);
+  flt.frequency.exponentialRampToValueAtTime(60, now + 0.45);
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0.5, now);
+  g.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+  src.connect(flt); flt.connect(g); g.connect(ctx.destination);
+  src.start(now); src.stop(now + 0.45);
+}
+
+function playHealthPickup() {
+  if (soundMuted) return;
+  const ctx = _ctx(), now = ctx.currentTime;
+  [523.25, 659.25, 783.99].forEach((freq, i) => {
+    const t = now + i * 0.1;
+    const osc = ctx.createOscillator(), g = ctx.createGain();
+    osc.connect(g); g.connect(ctx.destination);
+    osc.type = 'sine'; osc.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.28, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+    osc.start(t); osc.stop(t + 0.22);
+  });
+}
+
+function playTimePickup() {
+  if (soundMuted) return;
+  const ctx = _ctx(), now = ctx.currentTime;
+  [440, 554.37, 659.25, 880].forEach((freq, i) => {
+    const t = now + i * 0.07;
+    const osc = ctx.createOscillator(), g = ctx.createGain();
+    osc.connect(g); g.connect(ctx.destination);
+    osc.type = 'triangle'; osc.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.22, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+    osc.start(t); osc.stop(t + 0.16);
+  });
+}
+
+function playLevelUp() {
+  if (soundMuted) return;
+  const ctx = _ctx(), now = ctx.currentTime;
+  [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+    const t = now + i * 0.11;
+    const osc = ctx.createOscillator(), g = ctx.createGain();
+    osc.connect(g); g.connect(ctx.destination);
+    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.16, t + 0.03);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.24);
+    osc.start(t); osc.stop(t + 0.24);
+  });
+}
 
 // ── Infinite procedural difficulty ───────────────────
 function getLevelConfig(lvl) {
@@ -31,8 +127,7 @@ function getLevelConfig(lvl) {
     vxMax:     Math.max(0, Math.min((lvl - 2) * 65, 200)),
     timeLimit: Math.max(10, 52 - lvl * 4),
     label:     'LEVEL ' + (lvl + 1),
-    hasLock:   lvl >= 3,           // Roll/Pitch lock active from Level 4+
-    hasAutoFire: lvl >= 9,         // Continuous fire from Level 10+
+    hasLock:   lvl >= 3,   // roll/pitch lock active from Level 4 onwards
   };
 }
 
@@ -48,26 +143,24 @@ let mapDriftAcc  = 0;
 let map, W, H;
 let playerName   = "Player";
 
-// ── Auto-fire (Feature 3) ─────────────────────────────
-const AUTO_FIRE_INTERVAL = 0.18;  // seconds between continuous shots
+// ── Auto-fire ─────────────────────────────────────────
+const AUTO_FIRE_INTERVAL = 0.18;   // seconds between shots when held
 let autoFireTimer = 0;
 
-// ── Roll / Pitch lock (Feature 4) ────────────────────
-// lockAxis: null | 'x' (roll) | 'y' (pitch)
-// lockState: 'none' | 'warning' | 'locked'
-let lockAxis          = null;
-let lockState         = 'none';
-let lockTimer         = 0;
-let lockWarnTimer     = 0;
-let lockScheduleTO    = null;   // setTimeout handle
+// ── Roll / Pitch lock ─────────────────────────────────
+let lockAxis            = null;    // 'x' | 'y' | null
+let lockState           = 'none';  // 'none' | 'warning' | 'locked'
+let lockTimer           = 0;       // seconds remaining while locked
+let lockWarnTimer       = 0;       // countdown before lock engages
+let lockScheduleTimeout = null;
 
 function scheduleLock() {
   if (gameOver || lockState !== 'none') return;
   if (!getLevelConfig(currentLevel).hasLock) return;
-  if (lockScheduleTO) clearTimeout(lockScheduleTO);
-  const delay = 12000 + Math.random() * 10000;  // 12-22 s into the level
-  lockScheduleTO = setTimeout(() => {
-    lockScheduleTO = null;
+  if (lockScheduleTimeout) clearTimeout(lockScheduleTimeout);
+  const delay = 10000 + Math.random() * 10000;   // 10-20 s into the level
+  lockScheduleTimeout = setTimeout(() => {
+    lockScheduleTimeout = null;
     if (!gameOver && lockState === 'none') startLockWarning();
   }, delay);
 }
@@ -83,22 +176,19 @@ function updateLockUI() {
   const el = document.getElementById('lock-warning');
   if (!el) return;
   if (lockState === 'warning') {
-    const name = lockAxis === 'x' ? 'ROLL' : 'PITCH';
     el.className = 'warn';
-    el.textContent = `\u26A0 ${name} LOCK IN ${Math.ceil(lockWarnTimer)}`;
+    el.textContent = `⚠ ${lockAxis === 'x' ? 'ROLL' : 'PITCH'} LOCK IN ${Math.ceil(lockWarnTimer)}`;
     el.style.display = 'block';
   } else if (lockState === 'locked') {
-    const name = lockAxis === 'x' ? 'ROLL' : 'PITCH';
     el.className = 'locked';
-    el.textContent = `\u26D4 ${name} LOCKED \u2014 ${Math.ceil(lockTimer)}s`;
+    el.textContent = `⛔ ${lockAxis === 'x' ? 'ROLL' : 'PITCH'} LOCKED — ${Math.ceil(lockTimer)}s`;
     el.style.display = 'block';
   } else {
-    el.className = '';
     el.style.display = 'none';
   }
 }
 
-// ── Map initialisation ───────────────────────────────
+// ── Map initialisation ────────────────────────────────
 function initMap() {
   W = window.innerWidth;
   H = window.innerHeight;
@@ -129,11 +219,11 @@ function px(x, y) {
   return map.containerPointToLatLng(L.point(x, y));
 }
 
-// ── Controls (digital + analog joystick) ─────────────
+// ── Keyboard controls ─────────────────────────────────
 const controls = {
   up: false, down: false, left: false, right: false,
   spaceHeld: false,
-  jx: 0, jy: 0,   // analog joystick: -1..1
+  jx: 0, jy: 0,   // analog joystick axes
 };
 
 function keypressHandler(e) {
@@ -142,6 +232,7 @@ function keypressHandler(e) {
   if (e.key === 'w' || e.key === 'ArrowUp')    { controls.up    = v; e.preventDefault(); }
   if (e.key === 's' || e.key === 'ArrowDown')  { controls.down  = v; e.preventDefault(); }
   if (e.key === 'd' || e.key === 'ArrowRight') { controls.right = v; e.preventDefault(); }
+  if ((e.key === 'm' || e.key === 'M') && v)   { toggleMute(); }
   if (e.key === ' ') {
     e.preventDefault();
     if (v && !controls.spaceHeld) {
@@ -153,7 +244,7 @@ function keypressHandler(e) {
   }
 }
 
-// ── Spaceship ────────────────────────────────────────
+// ── Spaceship ─────────────────────────────────────────
 const ship = { x: 0, y: 0, s: 300, w: 60, h: 80, hl: 100 };
 let shipMarker;
 
@@ -178,31 +269,30 @@ function moveShip(dt) {
 
   // Digital (keyboard)
   if (canX) {
-    if (controls.left  && ship.x > ship.w / 2)       ship.x -= ship.s * dt;
-    if (controls.right && ship.x < W - ship.w / 2)   ship.x += ship.s * dt;
+    if (controls.left  && ship.x > ship.w / 2)     ship.x -= ship.s * dt;
+    if (controls.right && ship.x < W - ship.w / 2) ship.x += ship.s * dt;
   }
   if (canY) {
-    if (controls.up    && ship.y > ship.h / 2)        ship.y -= ship.s * dt;
-    if (controls.down  && ship.y < H - ship.h / 2)   ship.y += ship.s * dt;
+    if (controls.up   && ship.y > ship.h / 2)      ship.y -= ship.s * dt;
+    if (controls.down && ship.y < H - ship.h / 2)  ship.y += ship.s * dt;
   }
 
-  // Analog joystick (proportional speed — faster further from centre)
+  // Analog joystick — speed proportional to thumb offset from centre
   if (controls.jx !== 0 || controls.jy !== 0) {
-    if (canX) ship.x = Math.max(ship.w / 2,     Math.min(W - ship.w / 2, ship.x + controls.jx * ship.s * dt));
-    if (canY) ship.y = Math.max(ship.h / 2,     Math.min(H - ship.h / 2, ship.y + controls.jy * ship.s * dt));
+    if (canX) ship.x = Math.max(ship.w / 2, Math.min(W - ship.w / 2, ship.x + controls.jx * ship.s * dt));
+    if (canY) ship.y = Math.max(ship.h / 2, Math.min(H - ship.h / 2, ship.y + controls.jy * ship.s * dt));
   }
 }
 
-// ── Asteroids ────────────────────────────────────────
+// ── Asteroids ─────────────────────────────────────────
 const asteroids = [];
 
 function spawnAsteroid() {
   const src = Math.random() < 0.5 ? ASSETS.asteroid1 : ASSETS.asteroid2;
   const lvl = getLevelConfig(currentLevel);
   const obj = {
-    x:  Math.random() * W,
-    y:  -30,
-    w:  50, h: 50,
+    x: Math.random() * W, y: -30,
+    w: 50, h: 50,
     s:  Math.random() * (lvl.speedMax - lvl.speedMin) + lvl.speedMin,
     vx: (Math.random() * 2 - 1) * lvl.vxMax,
   };
@@ -210,8 +300,7 @@ function spawnAsteroid() {
     icon: L.divIcon({
       className: '',
       html: `<img src="${src}" width="50" height="50" class="asteroid-spin" style="display:block;filter:drop-shadow(0 0 6px rgba(255,80,80,0.5))">`,
-      iconSize: [50, 50],
-      iconAnchor: [25, 25],
+      iconSize: [50, 50], iconAnchor: [25, 25],
     }),
     interactive: false,
   }).addTo(map);
@@ -227,45 +316,40 @@ function moveAsteroids(dt) {
 }
 
 function resetAsteroid(a) {
-  a.y = -30;
-  a.x = Math.random() * W;
+  a.y  = -30;
+  a.x  = Math.random() * W;
   const lvl = getLevelConfig(currentLevel);
   a.s  = Math.random() * (lvl.speedMax - lvl.speedMin) + lvl.speedMin;
   a.vx = (Math.random() * 2 - 1) * lvl.vxMax;
 }
 
-// ── Powerups: health + time boost (Feature 1) ────────
+// ── Powerups (health + time boost) ───────────────────
 const powerups = [];
 
 function spawnHealth() {
   if (gameOver) return;
-  _spawnPowerup('health', HEALTH_SVG, 'health-pulse',
+  _spawnPowerup('health', HEALTH_SVG,    'health-pulse',
     'rgba(57,255,20,0.9)', 'rgba(57,255,20,0.5)', 80);
 }
 
 function spawnTimeBoost() {
   if (gameOver) return;
-  _spawnPowerup('time', TIMEBOOST_SVG, 'timeboost-pulse',
+  _spawnPowerup('time',   TIMEBOOST_SVG, 'timeboost-pulse',
     'rgba(0,255,245,0.9)', 'rgba(0,255,245,0.5)', 70);
 }
 
-function _spawnPowerup(type, svg, cssClass, glow1, glow2, speed) {
+function _spawnPowerup(type, svg, cls, c1, c2, speed) {
   const obj = {
-    x: Math.random() * (W - 60) + 30,
-    y: -30,
-    w: 34, h: 34,
-    s: speed,
-    type,
+    x: Math.random() * (W - 60) + 30, y: -30,
+    w: 34, h: 34, s: speed, type,
   };
   obj.marker = L.marker(px(obj.x, obj.y), {
     icon: L.divIcon({
       className: '',
-      html: `<img src="${svg}" width="34" height="34" class="${cssClass}" style="display:block;filter:drop-shadow(0 0 10px ${glow1}) drop-shadow(0 0 20px ${glow2})">`,
-      iconSize: [34, 34],
-      iconAnchor: [17, 17],
+      html: `<img src="${svg}" width="34" height="34" class="${cls}" style="display:block;filter:drop-shadow(0 0 10px ${c1}) drop-shadow(0 0 20px ${c2})">`,
+      iconSize: [34, 34], iconAnchor: [17, 17],
     }),
-    interactive: false,
-    zIndexOffset: 400,
+    interactive: false, zIndexOffset: 400,
   }).addTo(map);
   powerups.push(obj);
 }
@@ -280,7 +364,7 @@ function movePowerups(dt) {
   }
 }
 
-// ── Shots ────────────────────────────────────────────
+// ── Shots ─────────────────────────────────────────────
 const shots = [];
 
 function fireShot() {
@@ -289,13 +373,12 @@ function fireShot() {
     icon: L.divIcon({
       className: '',
       html: `<img src="${ASSETS.shot}" width="20" height="30" style="display:block;filter:drop-shadow(0 0 8px rgba(57,255,20,0.95)) drop-shadow(0 0 18px rgba(57,255,20,0.5))">`,
-      iconSize: [20, 30],
-      iconAnchor: [10, 15],
+      iconSize: [20, 30], iconAnchor: [10, 15],
     }),
-    interactive: false,
-    zIndexOffset: 200,
+    interactive: false, zIndexOffset: 200,
   }).addTo(map);
   shots.push(obj);
+  playLaser();
 }
 
 function moveShots(dt) {
@@ -316,13 +399,12 @@ function explodeAt(x, y) {
     icon: L.divIcon({
       className: '',
       html: `<img src="${EXPLOSION_SVG}" width="60" height="60" class="explode-anim" style="display:block">`,
-      iconSize: [60, 60],
-      iconAnchor: [30, 30],
+      iconSize: [60, 60], iconAnchor: [30, 30],
     }),
-    interactive: false,
-    zIndexOffset: 300,
+    interactive: false, zIndexOffset: 300,
   }).addTo(map);
   setTimeout(() => map.removeLayer(m), 500);
+  playExplosion();
 }
 
 // ── Collision detection ───────────────────────────────
@@ -356,18 +438,12 @@ function getLevelIndex(score) {
 
 function levelUp(newIdx) {
   currentLevel = newIdx;
-  const lvl    = getLevelConfig(currentLevel);
-  levelTimer   = lvl.timeLimit;
+  const lvl = getLevelConfig(currentLevel);
+  levelTimer = lvl.timeLimit;
   while (asteroids.length < lvl.count) spawnAsteroid();
   showLevelBanner(lvl.label);
-
-  // Reset lock state for the new level and schedule fresh lock if eligible
-  if (lockScheduleTO) { clearTimeout(lockScheduleTO); lockScheduleTO = null; }
-  lockState = 'none'; lockAxis = null; updateLockUI();
+  playLevelUp();
   if (lvl.hasLock) scheduleLock();
-
-  // Announce auto-fire unlock on first eligible level
-  if (lvl.hasAutoFire && newIdx === 9) showNotice('AUTO-FIRE UNLOCKED \u2014 HOLD TO FIRE');
 }
 
 function showLevelBanner(label) {
@@ -375,15 +451,10 @@ function showLevelBanner(label) {
   el.className = 'level-banner';
   el.textContent = label;
   document.body.appendChild(el);
-  setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 600); }, 1600);
-}
-
-function showNotice(text) {
-  const el = document.createElement('div');
-  el.className = 'game-notice';
-  el.textContent = text;
-  document.body.appendChild(el);
-  setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 700); }, 2200);
+  setTimeout(() => {
+    el.style.opacity = '0';
+    setTimeout(() => el.remove(), 600);
+  }, 1600);
 }
 
 // ── Map parallax drift ────────────────────────────────
@@ -398,6 +469,14 @@ function driftMap(dt) {
   }
 }
 
+// ── Time-pickup flash on the timer display ───────────
+function showTimePulse() {
+  const el = document.getElementById('timer');
+  if (!el) return;
+  el.classList.add('time-gained');
+  setTimeout(() => el.classList.remove('time-gained'), 900);
+}
+
 // ── Game loop ─────────────────────────────────────────
 let points = 0, gameOver = false, lastTime = 0;
 
@@ -406,13 +485,13 @@ function tick(ts) {
   requestAnimationFrame(tick);
 
   if (lastTime === 0) { lastTime = ts; return; }
-  const dt   = Math.min((ts - lastTime) / 1000, 0.1);
-  lastTime   = ts;
+  const dt = Math.min((ts - lastTime) / 1000, 0.1);
+  lastTime = ts;
 
   levelTimer -= dt;
   if (levelTimer <= 0) { endGame("TIME'S UP"); return; }
 
-  // ── Lock state machine (Feature 4) ────────────────
+  // ── Lock state machine ────────────────────────────
   if (lockState === 'warning') {
     lockWarnTimer -= dt;
     updateLockUI();
@@ -420,10 +499,13 @@ function tick(ts) {
   } else if (lockState === 'locked') {
     lockTimer -= dt;
     updateLockUI();
-    if (lockTimer <= 0) {
-      lockState = 'none'; lockAxis = null; updateLockUI();
-      scheduleLock();   // one more lock per level after the first ends
-    }
+    if (lockTimer <= 0) { lockState = 'none'; lockAxis = null; updateLockUI(); scheduleLock(); }
+  }
+
+  // ── Continuous fire — Level 10+ ───────────────────
+  if (currentLevel >= 9 && controls.spaceHeld) {
+    autoFireTimer -= dt;
+    if (autoFireTimer <= 0) { fireShot(); autoFireTimer = AUTO_FIRE_INTERVAL; }
   }
 
   moveShip(dt);
@@ -432,13 +514,7 @@ function tick(ts) {
   movePowerups(dt);
   driftMap(dt);
 
-  // ── Continuous fire at Level 10+ (Feature 3) ──────
-  if (getLevelConfig(currentLevel).hasAutoFire && controls.spaceHeld) {
-    autoFireTimer -= dt;
-    if (autoFireTimer <= 0) { fireShot(); autoFireTimer = AUTO_FIRE_INTERVAL; }
-  }
-
-  // Check level up
+  // Level up check
   const newLevel = getLevelIndex(points);
   if (newLevel > currentLevel) levelUp(newLevel);
 
@@ -448,10 +524,11 @@ function tick(ts) {
     if (isColliding(p, ship)) {
       if (p.type === 'health') {
         ship.hl = Math.min(100, ship.hl + 40);
+        playHealthPickup();
       } else if (p.type === 'time') {
-        // Add 12 s, but cap at original time limit + 12 to avoid huge grants
         levelTimer = Math.min(levelTimer + 12, getLevelConfig(currentLevel).timeLimit + 12);
-        flashTimer();
+        showTimePulse();
+        playTimePickup();
       }
       map.removeLayer(p.marker);
       powerups.splice(i, 1);
@@ -485,18 +562,11 @@ function tick(ts) {
   render();
 }
 
-function flashTimer() {
-  const el = document.getElementById('timer');
-  if (!el) return;
-  el.classList.add('time-gained');
-  setTimeout(() => el.classList.remove('time-gained'), 900);
-}
-
 // ── Game over ─────────────────────────────────────────
 function endGame(reason) {
   gameOver = true;
   const div = document.createElement('div');
-  div.id    = 'gameover';
+  div.id = 'gameover';
   div.innerHTML = `
     <div class="gameover-title">${reason || 'GAME OVER'}</div>
     <div class="gameover-player">${playerName} &mdash; ${points} pts</div>
@@ -516,73 +586,66 @@ function isTabletDevice() {
   return /(iPad|Android)/i.test(navigator.userAgent);
 }
 
-// ── Touch controls (Feature 2: analog joystick) ───────
+// ── Touch controls: analog joystick + fire ────────────
 function setupTouchControls() {
-  const isMobile    = isMobileDevice();
-  const isTablet    = isTabletDevice();
   const isSmallScreen = window.innerWidth < 1024;
-  if (!isMobile && !isTablet && !isSmallScreen) return;
+  if (!isMobileDevice() && !isTabletDevice() && !isSmallScreen) return;
 
   document.getElementById('touch-controls').classList.add('show');
 
-  // ── Virtual joystick ──────────────────────────────
+  // ── Virtual joystick ─────────────────────────────
   const zone  = document.getElementById('joystick-zone');
   const base  = document.getElementById('joystick-base');
   const thumb = document.getElementById('joystick-thumb');
-  const MAX_R = 42;     // max thumb displacement in px
-  let jActive = false;
+  const MAX_R = 42;
+  let   active = false;
 
   function applyJoystick(cx, cy) {
-    const r  = base.getBoundingClientRect();
-    const bx = r.left + r.width  / 2;
-    const by = r.top  + r.height / 2;
-    let dx   = cx - bx;
-    let dy   = cy - by;
-    const d  = Math.sqrt(dx * dx + dy * dy);
-    if (d > MAX_R) { dx = dx / d * MAX_R; dy = dy / d * MAX_R; }
+    const r = base.getBoundingClientRect();
+    let dx  = cx - (r.left + r.width  / 2);
+    let dy  = cy - (r.top  + r.height / 2);
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist > MAX_R) { dx = dx / dist * MAX_R; dy = dy / dist * MAX_R; }
     controls.jx = dx / MAX_R;
     controls.jy = dy / MAX_R;
     thumb.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
   }
 
   function releaseJoystick() {
-    jActive = false;
+    active = false;
     controls.jx = 0; controls.jy = 0;
     thumb.style.transform = 'translate(-50%, -50%)';
   }
 
-  zone.addEventListener('touchstart',  (e) => { e.preventDefault(); jActive = true; applyJoystick(e.changedTouches[0].clientX, e.changedTouches[0].clientY); }, { passive: false });
-  zone.addEventListener('touchmove',   (e) => { e.preventDefault(); if (jActive) applyJoystick(e.changedTouches[0].clientX, e.changedTouches[0].clientY); }, { passive: false });
+  zone.addEventListener('touchstart',  (e) => { e.preventDefault(); active = true; applyJoystick(e.changedTouches[0].clientX, e.changedTouches[0].clientY); }, { passive: false });
+  zone.addEventListener('touchmove',   (e) => { e.preventDefault(); if (active) applyJoystick(e.changedTouches[0].clientX, e.changedTouches[0].clientY); }, { passive: false });
   zone.addEventListener('touchend',    (e) => { e.preventDefault(); releaseJoystick(); });
   zone.addEventListener('touchcancel', (e) => { e.preventDefault(); releaseJoystick(); });
-  // Mouse fallback for desktop testing of touch UI
-  zone.addEventListener('mousedown', (e) => { jActive = true; applyJoystick(e.clientX, e.clientY); });
-  document.addEventListener('mousemove', (e) => { if (jActive) applyJoystick(e.clientX, e.clientY); });
-  document.addEventListener('mouseup',   ()  => { if (jActive) releaseJoystick(); });
+  // Mouse fallback for desktop testing
+  zone.addEventListener('mousedown', (e) => { active = true; applyJoystick(e.clientX, e.clientY); });
+  document.addEventListener('mousemove', (e) => { if (active) applyJoystick(e.clientX, e.clientY); });
+  document.addEventListener('mouseup',   ()  => { if (active) releaseJoystick(); });
 
-  // ── Fire button ───────────────────────────────────
-  const fireBtn = document.getElementById('fire-btn');
-
-  function startFire() {
-    if (!controls.spaceHeld) {
-      fireShot();
-      controls.spaceHeld = true;
-      autoFireTimer = AUTO_FIRE_INTERVAL;
-    }
-  }
-  function stopFire() { controls.spaceHeld = false; autoFireTimer = 0; }
+  // ── Fire button ──────────────────────────────────
+  const fireBtn   = document.getElementById('fire-btn');
+  const startFire = () => { if (!controls.spaceHeld) { fireShot(); controls.spaceHeld = true; autoFireTimer = AUTO_FIRE_INTERVAL; } };
+  const stopFire  = () => { controls.spaceHeld = false; autoFireTimer = 0; };
 
   fireBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startFire(); }, { passive: false });
-  fireBtn.addEventListener('touchend',   (e) => { e.preventDefault(); stopFire();  });
+  fireBtn.addEventListener('touchend',   (e) => { e.preventDefault(); stopFire(); });
   fireBtn.addEventListener('mousedown',  startFire);
   fireBtn.addEventListener('mouseup',    stopFire);
 }
 
 // ── Entry point ───────────────────────────────────────
 function startGame() {
-  const input  = document.getElementById('player-name');
-  const name   = input.value.trim();
-  playerName   = name.length > 0 ? name : "Player";
+  const input = document.getElementById('player-name');
+  const name  = input.value.trim();
+  playerName  = name.length > 0 ? name : "Player";
+
+  // Unlock AudioContext — must happen inside a user-gesture handler
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
 
   const screen = document.getElementById('startscreen');
   screen.style.opacity    = '0';
@@ -597,7 +660,7 @@ function startGame() {
     initShip();
     levelTimer = getLevelConfig(0).timeLimit;
     for (let i = 0; i < getLevelConfig(0).count; i++) spawnAsteroid();
-    setInterval(spawnHealth,    15000);   // health every 15 s
+    setInterval(spawnHealth,    15000);   // health drop every 15 s
     setInterval(spawnTimeBoost, 22000);   // time boost every 22 s
     requestAnimationFrame(tick);
   });
