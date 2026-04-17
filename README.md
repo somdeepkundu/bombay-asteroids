@@ -25,7 +25,9 @@ A browser-based shoot'em'up game built with **vanilla HTML, CSS, and JavaScript*
         <tr><td><kbd>A</kbd> / <kbd>←</kbd></td><td>Move left</td></tr>
         <tr><td><kbd>S</kbd> / <kbd>↓</kbd></td><td>Move down</td></tr>
         <tr><td><kbd>D</kbd> / <kbd>→</kbd></td><td>Move right</td></tr>
-        <tr><td><kbd>SPACE</kbd></td><td>Fire shot</td></tr>
+        <tr><td><kbd>SPACE</kbd></td><td>Fire (hold for auto-fire at Lv.10+)</td></tr>
+        <tr><td><kbd>M</kbd> / 🔊</td><td>Toggle sound</td></tr>
+        <tr><td>🕹️ Joystick</td><td>Mobile/tablet — analog movement</td></tr>
       </table>
     </td>
     <td width="50%">
@@ -48,11 +50,17 @@ A browser-based shoot'em'up game built with **vanilla HTML, CSS, and JavaScript*
 - **Leaflet.js map background** — game world centered on IIT Bombay, Mumbai with parallax drift effect (simulates forward flight)
 - **Neon arcade theme** — synthwave-inspired CSS with glowing text, animated starfield, and pulsing HUD elements
 - **Smooth movement** — delta-time based physics for consistent speed across all frame rates
+- **Virtual analog joystick** — mobile/tablet friendly with proportional speed control (slow near center, fast at edges)
 - **Shooting mechanics** — fire green plasma bolts to destroy asteroids before they hit you
+- **Auto-fire at Level 10+** — hold SPACE (or FIRE button) for continuous burst fire
 - **Collision detection** — circle-based distance calculations for spaceship-asteroid and shot-asteroid interactions
 - **Health & scoring system** — gradient health bar, zero-padded score, level indicator, and countdown timer
 - **Countdown timer** — per-level time pressure that shrinks as you advance; time out = game over
-- **Health powerups** — spawn every 15 seconds to restore health (max 100 HP)
+- **Dual powerups** — health (every 15s) and time boost (every 22s) that fall from the sky
+- **Roll/Pitch locks** — from Level 4 onwards, randomly lock horizontal (roll) or vertical (pitch) movement with 5-second warning
+- **Sound effects** — retro arcade audio (laser, explosion, powerup chimes, level-up fanfare) generated with Web Audio API
+- **Sound mute toggle** — press M or click 🔊 button to toggle audio
+- **Persistent player name** — your name is saved to localStorage, no re-entry needed
 - **Game over screen** — dramatic overlay showing final score, level reached, and credits
 
 ---
