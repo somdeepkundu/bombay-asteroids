@@ -7,6 +7,9 @@
 
 const VERSION = "v2.1.1";
 
+// ── Leaderboard API ──────────────────────────────────
+const LEADERBOARD_API = 'https://bombay-asteroids-api.onrender.com'; // Update after deploying backend!
+
 const EXPLOSION_SVG = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'><circle cx='30' cy='30' r='28' fill='%23ff7b00' opacity='0.7'/><circle cx='30' cy='30' r='18' fill='%23ffd60a' opacity='0.9'/><circle cx='30' cy='30' r='9' fill='%23ffffff' opacity='0.95'/><polygon points='30,0 34,24 58,30 34,36 30,60 26,36 2,30 26,24' fill='%23ff006e' opacity='0.55'/></svg>`;
 
 const HEALTH_SVG = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' rx='5' fill='%23001a00' opacity='0.7'/><path d='M19 10.5H13.5V5H10.5V10.5H5V13.5H10.5V19H13.5V13.5H19V10.5Z' fill='%2339ff14'/></svg>`;
@@ -563,20 +566,70 @@ function tick(ts) {
   render();
 }
 
+// ── Leaderboard API ─────────────────────────────────
+async function saveToLeaderboard(name, score) {
+  try {
+    const response = await fetch(`${LEADERBOARD_API}/api/score`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, score })
+    });
+    if (response.ok) {
+      console.log('✅ Score saved to leaderboard!');
+      loadLeaderboard();
+    }
+  } catch (error) {
+    console.error('❌ Leaderboard save failed:', error);
+  }
+}
+
+async function loadLeaderboard() {
+  try {
+    const response = await fetch(`${LEADERBOARD_API}/api/leaderboard`);
+    const scores = await response.json();
+    displayLeaderboard(scores);
+  } catch (error) {
+    console.error('❌ Leaderboard load failed:', error);
+  }
+}
+
+function displayLeaderboard(scores) {
+  const el = document.getElementById('leaderboard-list');
+  if (!el) return;
+  el.innerHTML = scores.map((s, i) => `
+    <div class="leaderboard-row ${i === 0 ? 'first' : ''} ${i === 1 ? 'second' : ''} ${i === 2 ? 'third' : ''}">
+      <span class="rank">#${s.rank}</span>
+      <span class="name">${s.name}</span>
+      <span class="score">${s.score}</span>
+    </div>
+  `).join('') || '<p style="color: #aaa; padding: 20px;">Loading leaderboard...</p>';
+}
+
 // ── Game over ─────────────────────────────────────────
 function endGame(reason) {
   gameOver = true;
+
+  // Save score to leaderboard
+  saveToLeaderboard(playerName, points);
+
   const div = document.createElement('div');
   div.id = 'gameover';
   div.innerHTML = `
     <div class="gameover-title">${reason || 'GAME OVER'}</div>
     <div class="gameover-player">${playerName} &mdash; ${points} pts</div>
     <div class="gameover-level">Reached ${getLevelConfig(currentLevel).label}</div>
+    <div style="margin-top: 16px; padding: 12px; border-top: 1px solid rgba(255,255,255,0.2);">
+      <div style="font-size: 12px; color: var(--neon-cyan); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;">🏆 Top 10 Global</div>
+      <div id="leaderboard-list" style="max-height: 180px; overflow-y: auto; font-size: 12px;"></div>
+    </div>
     <div class="gameover-credit">Developed by Somdeep Kundu &middot; @RuDRA Lab, C-TARA, IITB</div>
     <div class="gameover-source">learned from &ldquo;Problem Solving with Abstraction&rdquo; by Programming 2.0 (YouTube)</div>
     <button class="restart-btn" onclick="location.reload()">PLAY AGAIN</button>
   `;
   document.body.appendChild(div);
+
+  // Load leaderboard immediately
+  loadLeaderboard();
 }
 
 // ── Mobile / tablet detection ─────────────────────────

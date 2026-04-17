@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Leaflet Asteroids",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "3000",
+        "--directory",
+        "C:/Users/Somdeep Kundu/Downloads/files"
+      ],
+      "port": 3000
+    }
+  ]
+}

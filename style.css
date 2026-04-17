@@ -181,6 +181,66 @@ body {
   max-width: 560px;
 }
 
+/* ── Leaderboard display ──────────────────────────────── */
+#leaderboard-list {
+  font-family: 'Courier New', monospace;
+}
+
+.leaderboard-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(0, 255, 245, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.2s;
+}
+
+.leaderboard-row:hover {
+  background: rgba(0, 255, 245, 0.05);
+  color: var(--neon-cyan);
+}
+
+.leaderboard-row.first {
+  background: rgba(255, 215, 10, 0.15);
+  color: var(--neon-yellow);
+  font-weight: 700;
+  border-left: 3px solid var(--neon-yellow);
+  padding-left: 5px;
+}
+
+.leaderboard-row.second {
+  background: rgba(200, 200, 200, 0.08);
+  color: #d0d0d0;
+  font-weight: 600;
+  border-left: 3px solid #d0d0d0;
+  padding-left: 5px;
+}
+
+.leaderboard-row.third {
+  background: rgba(205, 127, 50, 0.15);
+  color: #cd7f32;
+  font-weight: 600;
+  border-left: 3px solid #cd7f32;
+  padding-left: 5px;
+}
+
+.leaderboard-row .rank {
+  min-width: 30px;
+  font-weight: 700;
+}
+
+.leaderboard-row .name {
+  flex: 1;
+  text-align: left;
+  padding: 0 8px;
+}
+
+.leaderboard-row .score {
+  text-align: right;
+  font-weight: 700;
+  color: var(--neon-green);
+}
+
 .restart-btn {
   margin-top: 8px;
   padding: 12px 36px;
