@@ -324,9 +324,9 @@ body {
 .intro-text {
   font-family: 'Courier New', monospace;
   color: #c8d8e8;
-  font-size: 16px;
-  line-height: 2;
-  min-height: 200px;
+  font-size: 13px;
+  line-height: 1.8;
+  min-height: 160px;
   white-space: pre-wrap;
 }
 .intro-text .pilot-name {
@@ -344,14 +344,14 @@ body {
 }
 .intro-skip-btn {
   display: none;
-  margin-top: 36px;
+  margin-top: 24px;
   background: transparent;
   border: 1px solid var(--neon-cyan);
   color: var(--neon-cyan);
   font-family: 'Orbitron', monospace;
-  font-size: 13px;
+  font-size: 11px;
   letter-spacing: 3px;
-  padding: 12px 28px;
+  padding: 9px 22px;
   cursor: pointer;
   border-radius: 4px;
   animation: pulse-glow 1.5s ease-in-out infinite;
