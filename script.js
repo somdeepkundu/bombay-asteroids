@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.0.7";
+const VERSION = "v2.0.8";
 
 const EXPLOSION_SVG = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'><circle cx='30' cy='30' r='28' fill='%23ff7b00' opacity='0.7'/><circle cx='30' cy='30' r='18' fill='%23ffd60a' opacity='0.9'/><circle cx='30' cy='30' r='9' fill='%23ffffff' opacity='0.95'/><polygon points='30,0 34,24 58,30 34,36 30,60 26,36 2,30 26,24' fill='%23ff006e' opacity='0.55'/></svg>`;
 
@@ -24,10 +24,10 @@ const ASSETS = {
 // Infinite procedural difficulty
 function getLevelConfig(lvl) {
   return {
-    count:     Math.min(3 + lvl * 2, 32),
+    count:     Math.min(3 + lvl * 2, 16),
     speedMin:  50  + lvl * 15,
-    speedMax:  100 + lvl * 28,
-    vxMax:     Math.max(0, (lvl - 2) * 65),
+    speedMax:  Math.min(100 + lvl * 28, 280),
+    vxMax:     Math.max(0, Math.min((lvl - 2) * 65, 200)),
     timeLimit: Math.max(10, 52 - lvl * 4),  // seconds to advance; floor at 10
     label:     'LEVEL ' + (lvl + 1),
   };
