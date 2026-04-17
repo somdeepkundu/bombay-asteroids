@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bombay Asteroids — Admin Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #040010;
+      color: #c8d8e8;
+      font-family: 'Orbitron', monospace;
+      min-height: 100vh;
+      padding: 32px 24px;
+    }
+    h1 {
+      color: #00fff5;
+      font-size: 20px;
+      letter-spacing: 4px;
+      text-shadow: 0 0 16px #00fff5;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      color: #556;
+      font-size: 11px;
+      letter-spacing: 2px;
+      margin-bottom: 36px;
+    }
+    .stats-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 36px;
+    }
+    .stat-card {
+      background: rgba(0,255,245,0.05);
+      border: 1px solid rgba(0,255,245,0.15);
+      border-radius: 8px;
+      padding: 18px 28px;
+      min-width: 140px;
+    }
+    .stat-label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: #556;
+      margin-bottom: 8px;
+    }
+    .stat-value {
+      font-size: 28px;
+      color: #00fff5;
+      text-shadow: 0 0 12px #00fff5;
+    }
+    .chart-wrap {
+      background: rgba(0,10,40,0.6);
+      border: 1px solid rgba(0,255,245,0.1);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 28px;
+    }
+    .chart-title {
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: #00fff5;
+      margin-bottom: 18px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    th {
+      text-align: left;
+      color: #00fff5;
+      font-size: 10px;
+      letter-spacing: 2px;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(0,255,245,0.2);
+    }
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+    }
+    tr:hover td { background: rgba(0,255,245,0.04); }
+    .rank-1 td:first-child { color: #ffd700; }
+    .rank-2 td:first-child { color: #c0c0c0; }
+    .rank-3 td:first-child { color: #cd7f32; }
+    .name-cell { color: #fff; }
+    .score-cell { color: #00fff5; font-weight: bold; }
+    .time-cell { color: #445; font-size: 11px; }
+    #status {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: #445;
+      margin-bottom: 24px;
+    }
+    .loading { color: #00fff5; animation: blink 1s step-end infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+  </style>
+</head>
+<body>
+  <h1>🚀 BOMBAY ASTEROIDS</h1>
+  <div class="subtitle">ADMIN DASHBOARD — LEADERBOARD ANALYTICS</div>
+
+  <div id="status" class="loading">FETCHING DATA...</div>
+
+  <div class="stats-row" id="stats-row" style="display:none"></div>
+
+  <div class="chart-wrap" id="chart-wrap" style="display:none">
+    <div class="chart-title">TOP SCORES — BAR CHART</div>
+    <canvas id="scoreChart" height="100"></canvas>
+  </div>
+
+  <div class="chart-wrap" id="timeline-wrap" style="display:none">
+    <div class="chart-title">SCORE SUBMISSIONS OVER TIME</div>
+    <canvas id="timelineChart" height="80"></canvas>
+  </div>
+
+  <div class="chart-wrap" id="table-wrap" style="display:none">
+    <div class="chart-title">ALL SCORES</div>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>NAME</th>
+          <th>SCORE</th>
+          <th>DATE</th>
+        </tr>
+      </thead>
+      <tbody id="score-table"></tbody>
+    </table>
+  </div>
+
+<script>
+const API = 'https://bombay-asteroids-1028845604936.europe-west1.run.app/api/admin?key=sRxMAdjR7-n9Doq1YFkppw';
+
+async function load() {
+  try {
+    const res = await fetch(API);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    render(data);
+  } catch(e) {
+    document.getElementById('status').textContent = 'ERROR: ' + e.message;
+    document.getElementById('status').style.color = '#ff006e';
+  }
+}
+
+function render(data) {
+  const scores = data.scores || [];
+  const total  = data.total || 0;
+
+  document.getElementById('status').style.display = 'none';
+
+  // ── Stats ──────────────────────────────────────────
+  const topScore = scores.length ? scores[0].score : 0;
+  const avg      = scores.length ? Math.round(scores.reduce((s,r)=>s+r.score,0)/scores.length) : 0;
+  const names    = new Set(scores.map(r => r.name.toLowerCase())).size;
+
+  const statsRow = document.getElementById('stats-row');
+  statsRow.style.display = 'flex';
+  statsRow.innerHTML = `
+    <div class="stat-card"><div class="stat-label">TOTAL PLAYS</div><div class="stat-value">${total}</div></div>
+    <div class="stat-card"><div class="stat-label">UNIQUE PLAYERS</div><div class="stat-value">${names}</div></div>
+    <div class="stat-card"><div class="stat-label">TOP SCORE</div><div class="stat-value">${topScore}</div></div>
+    <div class="stat-card"><div class="stat-label">AVG SCORE</div><div class="stat-value">${avg}</div></div>
+  `;
+
+  if (!scores.length) {
+    document.getElementById('status').textContent = 'No scores yet — go play!';
+    document.getElementById('status').style.display = 'block';
+    return;
+  }
+
+  // ── Bar chart — top 15 ─────────────────────────────
+  const top15 = scores.slice(0, 15);
+  document.getElementById('chart-wrap').style.display = 'block';
+  new Chart(document.getElementById('scoreChart'), {
+    type: 'bar',
+    data: {
+      labels: top15.map(r => r.name),
+      datasets: [{
+        label: 'Score',
+        data: top15.map(r => r.score),
+        backgroundColor: top15.map((_,i) =>
+          i===0 ? 'rgba(255,215,0,0.7)' :
+          i===1 ? 'rgba(192,192,192,0.6)' :
+          i===2 ? 'rgba(205,127,50,0.6)' :
+          'rgba(0,255,245,0.35)'
+        ),
+        borderColor: 'rgba(0,255,245,0.6)',
+        borderWidth: 1,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#778', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+        y: { ticks: { color: '#778', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+      }
+    }
+  });
+
+  // ── Timeline — submissions per day ─────────────────
+  const byDay = {};
+  scores.forEach(r => {
+    const day = r.timestamp ? r.timestamp.split(' ')[0] : 'unknown';
+    byDay[day] = (byDay[day] || 0) + 1;
+  });
+  const days   = Object.keys(byDay).sort();
+  const counts = days.map(d => byDay[d]);
+  document.getElementById('timeline-wrap').style.display = 'block';
+  new Chart(document.getElementById('timelineChart'), {
+    type: 'line',
+    data: {
+      labels: days,
+      datasets: [{
+        label: 'Games played',
+        data: counts,
+        borderColor: '#ff006e',
+        backgroundColor: 'rgba(255,0,110,0.1)',
+        tension: 0.3,
+        fill: true,
+        pointBackgroundColor: '#ff006e',
+      }]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#778', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+        y: { ticks: { color: '#778', font: { size: 10 }, stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' } }
+      }
+    }
+  });
+
+  // ── Full table ─────────────────────────────────────
+  document.getElementById('table-wrap').style.display = 'block';
+  const tbody = document.getElementById('score-table');
+  tbody.innerHTML = scores.map(r => `
+    <tr class="${r.rank<=3?'rank-'+r.rank:''}">
+      <td>${r.rank}</td>
+      <td class="name-cell">${r.name}</td>
+      <td class="score-cell">${r.score}</td>
+      <td class="time-cell">${r.timestamp || '—'}</td>
+    </tr>
+  `).join('');
+}
+
+load();
+</script>
+</body>
+</html>
