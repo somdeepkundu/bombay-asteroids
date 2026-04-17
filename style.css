@@ -326,7 +326,7 @@ body {
   color: #c8d8e8;
   font-size: 13px;
   line-height: 1.8;
-  min-height: 160px;
+  min-height: 100px;
   white-space: pre-wrap;
 }
 .intro-text .pilot-name {
@@ -344,7 +344,7 @@ body {
 }
 .intro-skip-btn {
   display: none;
-  margin-top: 24px;
+  margin-top: 14px;
   background: transparent;
   border: 1px solid var(--neon-cyan);
   color: var(--neon-cyan);
