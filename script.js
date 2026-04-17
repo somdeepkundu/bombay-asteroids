@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.1.6";
+const VERSION = "v2.1.7";
 
 // ── Leaderboard API ──────────────────────────────────
 const LEADERBOARD_API = 'https://bombay-asteroids-1028845604936.europe-west1.run.app'; // Google Cloud Run
@@ -701,28 +701,29 @@ function showIntro(name, onComplete) {
 
   // Story lines — %NAME% replaced with player's name
   const lines = [
-    '> PRIORITY ALPHA — 17 July, 2027',
+    '17 July, 2027.',
     '',
-    'They came without warning.',
+    'No one saw them coming.',
+    '',
+    'A shower of asteroids — ancient rocks',
+    'drifting through space for a billion years —',
+    'found Earth today.',
+    '',
+    'And Earth wasn\'t ready.',
     '',
     'Mumbai — the City of Dreams.',
-    'Twelve million souls. Twelve million stories.',
-    'The fishermen of Versova at dawn.',
+    'Twelve million people. Twelve million lives.',
+    'The fishermen of Versova.',
     'The dancers of Dharavi.',
-    'Children chasing kites above Marine Drive.',
+    'Children chasing kites on Marine Drive.',
     '',
-    'All of them — looking up.',
-    'All of them — afraid.',
-    '',
-    'The asteroids don\'t care about dreams.',
-    '',
-    'But you do.',
+    'All of them — looking up at the sky.',
     '',
     'You are %NAME%.',
-    'Pilot. Guardian. Their last hope.',
+    'A pilot. Up there. Between them and the rocks.',
     '',
-    'For every dream yet to be dreamed —',
-    'fly.',
+    'The city doesn\'t need a hero.',
+    'It just needs you — right now.',
   ];
 
   const fullText = lines.join('\n');
