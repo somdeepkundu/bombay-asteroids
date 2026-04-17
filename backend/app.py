@@ -107,6 +107,41 @@ def get_leaderboard():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+ADMIN_KEY = 'sRxMAdjR7-n9Doq1YFkppw'
+
+@app.route('/api/admin', methods=['GET'])
+def admin_scores():
+    """Private admin endpoint — returns ALL scores. Key protected."""
+    key = request.args.get('key', '')
+    if key != ADMIN_KEY:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    try:
+        conn = sqlite3.connect(DB_FILE)
+        c = conn.cursor()
+        c.execute("""
+            SELECT id, name, score, timestamp
+            FROM scores
+            ORDER BY score DESC
+        """)
+        rows = c.fetchall()
+        total = len(rows)
+        scores = [
+            {
+                "rank": idx + 1,
+                "id": row[0],
+                "name": row[1],
+                "score": row[2],
+                "timestamp": row[3]
+            }
+            for idx, row in enumerate(rows)
+        ]
+        conn.close()
+        return jsonify({"total": total, "scores": scores}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check endpoint for monitoring."""
