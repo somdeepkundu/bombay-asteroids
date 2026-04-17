@@ -155,7 +155,7 @@ Started with [programming2point0/asteroids](https://github.com/programming2point
 
 ## Credits
 
-- **Developed by**: Somdeep Kundu · [@RuDRA Lab](https://github.com/somdeepkundu), C-TARA, IIT Bombay
+- **Developed by**: Somdeep Kundu · [@RuDRA Lab](https://www.rudra.iitb.ac.in/), C-TARA, IIT Bombay
 - **Tutorial by**: [Programming 2.0](https://www.youtube.com/@programming2point0) (YouTube)
 - **Base repo**: [programming2point0/asteroids](https://github.com/programming2point0/asteroids)
 - **Graphics**: Free assets from [FreePik](https://www.freepik.com/)
