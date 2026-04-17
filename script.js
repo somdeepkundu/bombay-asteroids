@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.1.5";
+const VERSION = "v2.1.6";
 
 // ── Leaderboard API ──────────────────────────────────
 const LEADERBOARD_API = 'https://bombay-asteroids-1028845604936.europe-west1.run.app'; // Google Cloud Run
@@ -789,9 +789,15 @@ function startGame() {
   screen.style.transition = 'opacity 0.4s ease';
   setTimeout(() => { screen.style.display = 'none'; }, 400);
 
-  // Show cinematic intro, then launch game
+  // Show cinematic intro only on first-ever visit, then launch game directly
+  const hasSeenIntro = localStorage.getItem('bombay_asteroids_seen_intro');
   setTimeout(() => {
-    showIntro(playerName, launchGame);
+    if (!hasSeenIntro) {
+      localStorage.setItem('bombay_asteroids_seen_intro', '1');
+      showIntro(playerName, launchGame);
+    } else {
+      launchGame();
+    }
   }, 450);
 }
 
