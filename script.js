@@ -41,7 +41,8 @@ function scoreToReachLevel(lvl) {
 }
 
 let currentLevel = 0;
-let levelTimer   = 0;  // countdown seconds remaining on this level
+let levelTimer   = 0;
+let mapDriftAcc  = 0;  // accumulator for sub-pixel map drift  // countdown seconds remaining on this level
 let map, W, H;
 let playerName = "Player";
 
@@ -288,6 +289,20 @@ function showLevelBanner(label) {
   }, 1600);
 }
 
+
+// ── Map parallax drift ────────────────────────────────
+function driftMap(dt) {
+  if (!map) return;
+  // Baseline 18 px/s, +4 per level for a faster-feeling flight
+  const speed = 18 + currentLevel * 4;
+  mapDriftAcc += speed * dt;
+  if (mapDriftAcc >= 1) {
+    const dy = Math.floor(mapDriftAcc);
+    map.panBy([0, dy], { animate: false, noMoveStart: true });
+    mapDriftAcc -= dy;
+  }
+}
+
 // ── Game loop ────────────────────────────────────────
 let points = 0, gameOver = false, lastTime = 0;
 
@@ -306,6 +321,7 @@ function tick(ts) {
   moveAsteroids(dt);
   moveShots(dt);
   movePowerups(dt);
+  driftMap(dt);
 
   // Check level up
   const newLevel = getLevelIndex(points);
