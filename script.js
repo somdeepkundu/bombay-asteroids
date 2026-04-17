@@ -541,6 +541,7 @@ function tick(ts) {
     if (isColliding(a, ship)) {
       a.s *= 0.95;
       ship.hl -= 20 * dt;
+      playExplosion();  // Collision alert
       if (ship.hl <= 0) { endGame("HULL BREACH"); return; }
     }
   }
@@ -643,6 +644,11 @@ function startGame() {
   const name  = input.value.trim();
   playerName  = name.length > 0 ? name : "Player";
 
+  // Save player name to localStorage
+  if (playerName !== "Player") {
+    localStorage.setItem('bombay_asteroids_player_name', playerName);
+  }
+
   // Unlock AudioContext — must happen inside a user-gesture handler
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -673,6 +679,13 @@ window.addEventListener('load', () => {
 
   const btn   = document.getElementById('start-btn');
   const input = document.getElementById('player-name');
+
+  // Load saved player name from localStorage
+  const savedName = localStorage.getItem('bombay_asteroids_player_name');
+  if (savedName) {
+    input.value = savedName;
+  }
+
   btn.addEventListener('click', startGame);
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') startGame(); });
   input.focus();
