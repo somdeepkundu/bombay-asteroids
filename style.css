@@ -305,12 +305,14 @@ body {
 .intro-box {
   max-width: 620px;
   width: 90%;
-  padding: 48px 40px;
+  padding: 40px 36px 100px 36px;
   text-align: left;
   border: 1px solid rgba(0, 255, 245, 0.15);
   border-radius: 8px;
   background: rgba(0, 10, 40, 0.6);
   box-shadow: 0 0 60px rgba(0, 255, 245, 0.08);
+  max-height: 85vh;
+  overflow-y: auto;
 }
 .intro-date {
   font-family: 'Orbitron', monospace;
@@ -344,21 +346,26 @@ body {
 }
 .intro-skip-btn {
   display: none;
-  margin-top: 14px;
-  background: transparent;
+  position: fixed;
+  bottom: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 10, 40, 0.92);
   border: 1px solid var(--neon-cyan);
   color: var(--neon-cyan);
   font-family: 'Orbitron', monospace;
   font-size: 11px;
   letter-spacing: 3px;
-  padding: 9px 22px;
+  padding: 11px 28px;
   cursor: pointer;
   border-radius: 4px;
   animation: pulse-glow 1.5s ease-in-out infinite;
   transition: background 0.2s;
+  white-space: nowrap;
+  z-index: 3100;
 }
 .intro-skip-btn:hover {
-  background: rgba(0, 255, 245, 0.1);
+  background: rgba(0, 255, 245, 0.12);
 }
 @keyframes pulse-glow {
   0%, 100% { box-shadow: 0 0 8px rgba(0,255,245,0.4); }
