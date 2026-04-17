@@ -35,6 +35,11 @@ body {
   transform-origin: center;
 }
 
+.timeboost-pulse {
+  animation: tpulse 0.85s ease-in-out infinite;
+  transform-origin: center;
+}
+
 .explode-anim {
   animation: explode 0.5s ease-out forwards;
   transform-origin: center;
@@ -48,6 +53,11 @@ body {
 @keyframes hpulse {
   0%, 100% { transform: scale(1);    opacity: 1;    }
   50%      { transform: scale(1.18); opacity: 0.75; }
+}
+
+@keyframes tpulse {
+  0%, 100% { transform: scale(1);    opacity: 1;   }
+  50%      { transform: scale(1.22); opacity: 0.8; }
 }
 
 @keyframes explode {
@@ -412,6 +422,69 @@ body {
   50%       { opacity: 0.7; transform: scale(1.08); }
 }
 
+/* Timer flash when time boost collected */
+#timer.time-gained {
+  animation: time-gain-flash 0.9s ease-out forwards;
+}
+
+@keyframes time-gain-flash {
+  0%   { color: var(--neon-green); text-shadow: 0 0 24px var(--neon-green), 0 0 48px var(--neon-green); transform: scale(1.25); }
+  100% { color: var(--neon-cyan);  text-shadow: 0 0 8px var(--neon-cyan); transform: scale(1); }
+}
+
+/* ── Lock warning overlay ─────────────────────────── */
+#lock-warning {
+  position: fixed;
+  top: 78px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 22px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  z-index: 1200;
+  display: none;
+  white-space: nowrap;
+  pointer-events: none;
+  font-family: 'Orbitron', monospace;
+}
+
+#lock-warning.warn {
+  color: var(--neon-yellow);
+  border: 2px solid var(--neon-yellow);
+  background: rgba(0, 0, 0, 0.8);
+  text-shadow: 0 0 8px var(--neon-yellow);
+  animation: timer-pulse 0.4s ease-in-out infinite;
+}
+
+#lock-warning.locked {
+  color: var(--neon-pink);
+  border: 2px solid var(--neon-pink);
+  background: rgba(0, 0, 0, 0.8);
+  text-shadow: 0 0 8px var(--neon-pink);
+  box-shadow: 0 0 16px rgba(255, 0, 110, 0.35);
+}
+
+/* ── Generic game notice banner ───────────────────── */
+.game-notice {
+  position: fixed;
+  top: 42%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--neon-green);
+  text-shadow: 0 0 10px var(--neon-green), 0 0 24px var(--neon-green);
+  z-index: 1500;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.7s ease;
+}
+
 /* ── Start screen logo ────────────────────────────── */
 .start-logo {
   width: 90px;
@@ -447,48 +520,61 @@ body {
   display: flex;
 }
 
-#dpad {
+/* ── Virtual joystick (replaces D-pad) ─────────────── */
+#joystick-zone {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 8px;
-}
-
-.dpad-middle {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.dpad-btn {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: rgba(0, 255, 245, 0.15);
-  border: 2px solid var(--neon-cyan);
-  color: var(--neon-cyan);
-  font-weight: 900;
-  font-size: 18px;
-  cursor: pointer;
+  justify-content: center;
+  width: 160px;
+  height: 160px;
   touch-action: none;
   user-select: none;
-  transition: all 0.1s;
-  box-shadow: 0 0 10px rgba(0, 255, 245, 0.3);
   -webkit-user-select: none;
-  -webkit-touch-callout: none;
+  cursor: grab;
 }
 
-.dpad-btn:active {
-  background: rgba(0, 255, 245, 0.3);
-  box-shadow: 0 0 20px rgba(0, 255, 245, 0.7);
-  transform: scale(0.95);
+#joystick-base {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: rgba(0, 255, 245, 0.05);
+  border: 2px solid rgba(0, 255, 245, 0.22);
+  box-shadow:
+    0 0 22px rgba(0, 255, 245, 0.12),
+    inset 0 0 30px rgba(0, 0, 0, 0.4);
+  touch-action: none;
 }
 
-.dpad-btn.center {
-  width: 40px;
-  height: 40px;
-  border: none;
-  background: transparent;
+/* subtle cross-hair guides */
+#joystick-base::before,
+#joystick-base::after {
+  content: '';
+  position: absolute;
+  background: rgba(0, 255, 245, 0.12);
+  border-radius: 2px;
+}
+#joystick-base::before { width: 2px; height: 60%; top: 20%; left: 50%; transform: translateX(-50%); }
+#joystick-base::after  { height: 2px; width: 60%; left: 20%; top: 50%;  transform: translateY(-50%); }
+
+#joystick-thumb {
+  position: absolute;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 36%,
+    rgba(0, 255, 245, 0.55),
+    rgba(0, 80, 100, 0.35));
+  border: 2px solid var(--neon-cyan);
+  box-shadow:
+    0 0 14px rgba(0, 255, 245, 0.7),
+    0 0 30px rgba(0, 255, 245, 0.25);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  touch-action: none;
+  transition: box-shadow 0.1s;
 }
 
 .action-btn {

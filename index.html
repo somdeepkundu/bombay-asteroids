@@ -4,6 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bombay Asteroids</title>
+  <meta property="og:title" content="Bombay Asteroids">
+  <meta property="og:description" content="A high-octane arcade shooter with infinite procedural difficulty. Pilot your spaceship above Mumbai, dodge and destroy asteroids!">
+  <meta property="og:image" content="https://somdeepkundu.github.io/bombay-asteroids/assets/graphics/spaceship_full.svg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="https://somdeepkundu.github.io/bombay-asteroids/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Bombay Asteroids">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Bombay Asteroids">
+  <meta name="twitter:description" content="High-octane arcade shooter above Mumbai. Infinite levels. Dodge & destroy asteroids!">
+  <meta name="twitter:image" content="https://somdeepkundu.github.io/bombay-asteroids/assets/graphics/spaceship_full.svg">
+  <meta name="description" content="A high-octane arcade shooter with infinite procedural difficulty, built with vanilla HTML/CSS/JS. Pilot your spaceship above Mumbai.">
   <link rel="icon" type="image/svg+xml" href="assets/graphics/spaceship_full.svg">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="style.css">
@@ -40,22 +53,22 @@
         spellcheck="false"
       />
       <button class="start-btn" id="start-btn">PLAY</button>
-      <div class="start-hint">WASD / Arrow Keys &middot; SPACE to shoot</div>
+      <div class="start-hint">WASD / Arrows &middot; SPACE to fire &middot; Hold at Lv.10+ for auto-fire</div>
     </div>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+  <!-- Roll / Pitch lock warning -->
+  <div id="lock-warning"></div>
+
   <!-- Mobile touch controls -->
   <div id="touch-controls">
-    <div id="dpad">
-      <button id="up-btn" class="dpad-btn up">↑</button>
-      <div class="dpad-middle">
-        <button id="left-btn" class="dpad-btn left">←</button>
-        <button id="center-btn" class="dpad-btn center"></button>
-        <button id="right-btn" class="dpad-btn right">→</button>
+    <!-- Analog joystick (replaces D-pad) -->
+    <div id="joystick-zone">
+      <div id="joystick-base">
+        <div id="joystick-thumb"></div>
       </div>
-      <button id="down-btn" class="dpad-btn down">↓</button>
     </div>
     <button id="fire-btn" class="action-btn">FIRE</button>
   </div>
