@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.1.4";
+const VERSION = "v2.1.5";
 
 // ── Leaderboard API ──────────────────────────────────
 const LEADERBOARD_API = 'https://bombay-asteroids-1028845604936.europe-west1.run.app'; // Google Cloud Run
@@ -701,19 +701,28 @@ function showIntro(name, onComplete) {
 
   // Story lines — %NAME% replaced with player's name
   const lines = [
-    '> INCOMING TRANSMISSION...',
+    '> PRIORITY ALPHA — 17 July, 2027',
     '',
-    'Unidentified objects have breached',
-    'Earth\'s atmosphere at 03:41 UTC.',
+    'They came without warning.',
     '',
-    'Impact trajectory confirmed:',
-    'Mumbai. Gateway of India.',
+    'Mumbai — the City of Dreams.',
+    'Twelve million souls. Twelve million stories.',
+    'The fishermen of Versova at dawn.',
+    'The dancers of Dharavi.',
+    'Children chasing kites above Marine Drive.',
+    '',
+    'All of them — looking up.',
+    'All of them — afraid.',
+    '',
+    'The asteroids don\'t care about dreams.',
+    '',
+    'But you do.',
     '',
     'You are %NAME%.',
-    'Combat pilot. Last line of defense.',
+    'Pilot. Guardian. Their last hope.',
     '',
-    'Save the city.',
-    'No one else is coming.',
+    'For every dream yet to be dreamed —',
+    'fly.',
   ];
 
   const fullText = lines.join('\n');
@@ -731,7 +740,7 @@ function showIntro(name, onComplete) {
       const display = built.replace('%NAME%', `<span class="pilot-name">${name}</span>`);
       textEl.innerHTML = display;
       textEl.appendChild(cursor);
-      const delay = fullText[i - 1] === '\n' ? 120 : 28;
+      const delay = fullText[i - 1] === '\n' ? 150 : 32;
       setTimeout(type, delay);
     } else {
       // Typing done — show launch button
