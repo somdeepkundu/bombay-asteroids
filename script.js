@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.1.3";
+const VERSION = "v2.1.4";
 
 // ── Leaderboard API ──────────────────────────────────
 const LEADERBOARD_API = 'https://bombay-asteroids-1028845604936.europe-west1.run.app'; // Google Cloud Run
@@ -691,14 +691,83 @@ function setupTouchControls() {
   fireBtn.addEventListener('mouseup',    stopFire);
 }
 
+// ── Intro typewriter ──────────────────────────────────
+function showIntro(name, onComplete) {
+  const screen = document.getElementById('introscreen');
+  const textEl = document.getElementById('intro-text');
+  const btn    = document.getElementById('intro-skip-btn');
+
+  screen.classList.add('visible');
+
+  // Story lines — %NAME% replaced with player's name
+  const lines = [
+    '> INCOMING TRANSMISSION...',
+    '',
+    'Unidentified objects have breached',
+    'Earth\'s atmosphere at 03:41 UTC.',
+    '',
+    'Impact trajectory confirmed:',
+    'Mumbai. Gateway of India.',
+    '',
+    'You are %NAME%.',
+    'Combat pilot. Last line of defense.',
+    '',
+    'Save the city.',
+    'No one else is coming.',
+  ];
+
+  const fullText = lines.join('\n');
+  let i = 0;
+  let built = '';
+
+  // Cursor element
+  const cursor = document.createElement('span');
+  cursor.className = 'intro-cursor';
+
+  function type() {
+    if (i < fullText.length) {
+      built += fullText[i++];
+      // Render with name highlighted
+      const display = built.replace('%NAME%', `<span class="pilot-name">${name}</span>`);
+      textEl.innerHTML = display;
+      textEl.appendChild(cursor);
+      const delay = fullText[i - 1] === '\n' ? 120 : 28;
+      setTimeout(type, delay);
+    } else {
+      // Typing done — show launch button
+      cursor.remove();
+      btn.style.display = 'block';
+    }
+  }
+
+  // Start typing after a brief pause
+  setTimeout(type, 600);
+
+  // Launch button
+  btn.addEventListener('click', () => {
+    screen.style.opacity    = '0';
+    screen.style.transition = 'opacity 0.5s ease';
+    setTimeout(() => { screen.classList.remove('visible'); screen.style.opacity = ''; }, 500);
+    onComplete();
+  });
+
+  // Also allow any key to skip/launch after typing starts
+  document.addEventListener('keydown', function skipHandler(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      document.removeEventListener('keydown', skipHandler);
+      btn.click();
+    }
+  });
+}
+
 // ── Entry point ───────────────────────────────────────
 function startGame() {
   const input = document.getElementById('player-name');
   const name  = input.value.trim();
-  playerName  = name.length > 0 ? name : "Player";
+  playerName  = name.length > 0 ? name : "Pilot";
 
   // Save player name to localStorage
-  if (playerName !== "Player") {
+  if (playerName !== "Pilot") {
     localStorage.setItem('bombay_asteroids_player_name', playerName);
   }
 
@@ -711,6 +780,13 @@ function startGame() {
   screen.style.transition = 'opacity 0.4s ease';
   setTimeout(() => { screen.style.display = 'none'; }, 400);
 
+  // Show cinematic intro, then launch game
+  setTimeout(() => {
+    showIntro(playerName, launchGame);
+  }, 450);
+}
+
+function launchGame() {
   document.addEventListener('keydown', keypressHandler);
   document.addEventListener('keyup',   keypressHandler);
 

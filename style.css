@@ -288,6 +288,83 @@ body {
   opacity: 0.5;
 }
 
+/* ── Intro / Story Screen ─────────────────────────── */
+#introscreen {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at center, #05001a 0%, #000000 100%);
+  z-index: 2900;
+  animation: fadeIn 0.8s ease;
+}
+#introscreen.visible {
+  display: flex;
+}
+.intro-box {
+  max-width: 620px;
+  width: 90%;
+  padding: 48px 40px;
+  text-align: left;
+  border: 1px solid rgba(0, 255, 245, 0.15);
+  border-radius: 8px;
+  background: rgba(0, 10, 40, 0.6);
+  box-shadow: 0 0 60px rgba(0, 255, 245, 0.08);
+}
+.intro-date {
+  font-family: 'Orbitron', monospace;
+  color: var(--neon-pink);
+  font-size: 12px;
+  letter-spacing: 3px;
+  margin-bottom: 28px;
+  opacity: 0;
+  animation: fadeIn 1s ease 0.3s forwards;
+}
+.intro-text {
+  font-family: 'Courier New', monospace;
+  color: #c8d8e8;
+  font-size: 16px;
+  line-height: 2;
+  min-height: 200px;
+  white-space: pre-wrap;
+}
+.intro-text .pilot-name {
+  color: var(--neon-cyan);
+  font-weight: bold;
+  text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan);
+}
+.intro-cursor {
+  display: inline-block;
+  width: 10px;
+  height: 16px;
+  background: var(--neon-cyan);
+  vertical-align: middle;
+  animation: blink 0.7s step-end infinite;
+}
+.intro-skip-btn {
+  display: none;
+  margin-top: 36px;
+  background: transparent;
+  border: 1px solid var(--neon-cyan);
+  color: var(--neon-cyan);
+  font-family: 'Orbitron', monospace;
+  font-size: 13px;
+  letter-spacing: 3px;
+  padding: 12px 28px;
+  cursor: pointer;
+  border-radius: 4px;
+  animation: pulse-glow 1.5s ease-in-out infinite;
+  transition: background 0.2s;
+}
+.intro-skip-btn:hover {
+  background: rgba(0, 255, 245, 0.1);
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(0,255,245,0.4); }
+  50%       { box-shadow: 0 0 20px rgba(0,255,245,0.9); }
+}
+
 /* ── Start Screen ─────────────────────────────────── */
 #startscreen {
   position: fixed;
