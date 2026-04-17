@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.0.4";
+const VERSION = "v2.0.5";
 
 const EXPLOSION_SVG = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'><circle cx='30' cy='30' r='28' fill='%23ff7b00' opacity='0.7'/><circle cx='30' cy='30' r='18' fill='%23ffd60a' opacity='0.9'/><circle cx='30' cy='30' r='9' fill='%23ffffff' opacity='0.95'/><polygon points='30,0 34,24 58,30 34,36 30,60 26,36 2,30 26,24' fill='%23ff006e' opacity='0.55'/></svg>`;
 
@@ -380,6 +380,59 @@ function endGame(reason) {
   document.body.appendChild(div);
 }
 
+
+// ── Mobile detection & touch controls ──────────────
+function isMobileDevice() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
+function setupTouchControls() {
+  const isMobile = isMobileDevice();
+  if (!isMobile) return;
+
+  const touchControls = document.getElementById('touch-controls');
+  touchControls.classList.add('show');
+
+  const upBtn = document.getElementById('up-btn');
+  const downBtn = document.getElementById('down-btn');
+  const leftBtn = document.getElementById('left-btn');
+  const rightBtn = document.getElementById('right-btn');
+  const fireBtn = document.getElementById('fire-btn');
+
+  const handleStart = (e) => e.preventDefault();
+  const handleEnd = (e) => e.preventDefault();
+
+  // Up
+  upBtn.addEventListener('touchstart', (e) => { handleStart(e); controls.up = true; });
+  upBtn.addEventListener('touchend', (e) => { handleEnd(e); controls.up = false; });
+  upBtn.addEventListener('mousedown', () => { controls.up = true; });
+  upBtn.addEventListener('mouseup', () => { controls.up = false; });
+
+  // Down
+  downBtn.addEventListener('touchstart', (e) => { handleStart(e); controls.down = true; });
+  downBtn.addEventListener('touchend', (e) => { handleEnd(e); controls.down = false; });
+  downBtn.addEventListener('mousedown', () => { controls.down = true; });
+  downBtn.addEventListener('mouseup', () => { controls.down = false; });
+
+  // Left
+  leftBtn.addEventListener('touchstart', (e) => { handleStart(e); controls.left = true; });
+  leftBtn.addEventListener('touchend', (e) => { handleEnd(e); controls.left = false; });
+  leftBtn.addEventListener('mousedown', () => { controls.left = true; });
+  leftBtn.addEventListener('mouseup', () => { controls.left = false; });
+
+  // Right
+  rightBtn.addEventListener('touchstart', (e) => { handleStart(e); controls.right = true; });
+  rightBtn.addEventListener('touchend', (e) => { handleEnd(e); controls.right = false; });
+  rightBtn.addEventListener('mousedown', () => { controls.right = true; });
+  rightBtn.addEventListener('mouseup', () => { controls.right = false; });
+
+  // Fire
+  fireBtn.addEventListener('touchstart', (e) => { handleStart(e); if (!controls.spaceHeld) { fireShot(); controls.spaceHeld = true; } });
+  fireBtn.addEventListener('touchend', (e) => { handleEnd(e); controls.spaceHeld = false; });
+  fireBtn.addEventListener('mousedown', () => { if (!controls.spaceHeld) { fireShot(); controls.spaceHeld = true; } });
+  fireBtn.addEventListener('mouseup', () => { controls.spaceHeld = false; });
+}
+
 // ── Entry point ──────────────────────────────────────
 function startGame() {
   const input = document.getElementById('player-name');
@@ -405,6 +458,7 @@ function startGame() {
 }
 
 window.addEventListener('load', () => {
+  setupTouchControls();
   document.getElementById('version').textContent = VERSION;
   document.getElementById('start-version').textContent = VERSION;
 
