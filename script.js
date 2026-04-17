@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.0.5";
+const VERSION = "v2.0.6";
 
 const EXPLOSION_SVG = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'><circle cx='30' cy='30' r='28' fill='%23ff7b00' opacity='0.7'/><circle cx='30' cy='30' r='18' fill='%23ffd60a' opacity='0.9'/><circle cx='30' cy='30' r='9' fill='%23ffffff' opacity='0.95'/><polygon points='30,0 34,24 58,30 34,36 30,60 26,36 2,30 26,24' fill='%23ff006e' opacity='0.55'/></svg>`;
 
@@ -386,9 +386,14 @@ function isMobileDevice() {
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
 
+function isTabletDevice() {
+  return /(iPad|Android)/i.test(navigator.userAgent);
+}
+
 function setupTouchControls() {
   const isMobile = isMobileDevice();
-  if (!isMobile) return;
+  const isTablet = isTabletDevice();
+  if (!isMobile && !isTablet) return;
 
   const touchControls = document.getElementById('touch-controls');
   touchControls.classList.add('show');
