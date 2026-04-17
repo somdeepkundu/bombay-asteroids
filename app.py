@@ -55,4 +55,9 @@ bundled = html \
         f"<script>{js}</script>"
     )
 
+# Also rewrite any asset references that live in the HTML itself
+# (favicon link, start-screen logo <img>, etc.) so they resolve inside the iframe
+for path, uri in asset_map.items():
+    bundled = bundled.replace(f'"{path}"', f'"{uri}"')
+
 components.html(bundled, height=720, scrolling=False)
