@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.2.3";
+const VERSION = "v2.2.4";
 
 // ── Leaderboard API ──────────────────────────────────
 const LEADERBOARD_API = 'https://bombay-asteroids-1028845604936.europe-west1.run.app'; // Google Cloud Run
@@ -589,23 +589,32 @@ function tick(ts) {
   // Shot ↔ asteroid
   for (let i = shots.length - 1; i >= 0; i--) {
     const shot = shots[i];
-    for (const a of asteroids) {
+    for (let j = asteroids.length - 1; j >= 0; j--) {
+      const a = asteroids[j];
       if (isColliding(shot, a)) {
-        if (a.size === 'large') {
+        if (a.size === 'large' && currentLevel >= 7) {
+          // Split mechanic unlocks at Level 8 (index 7)
           points += 10;
           splitAsteroid(a);
-          map.removeLayer(a.marker);
-          asteroids.splice(asteroids.indexOf(a), 1);
         } else {
-          points += 15;
+          // Normal destroy — large before L8 gives 20pts, small gives 15pts
+          points += a.size === 'large' ? 20 : 15;
           explodeAt(a.x, a.y);
-          map.removeLayer(a.marker);
-          asteroids.splice(asteroids.indexOf(a), 1);
         }
+        map.removeLayer(a.marker);
+        asteroids.splice(j, 1);
         removeShot(shot);
         break;
       }
     }
+  }
+
+  // Continuously replenish asteroids to maintain level target count.
+  // This fixes the drought after Level 11 where destroyed asteroids were
+  // never replaced (levelUp only spawns on level-change, not every tick).
+  {
+    const targetCount = getLevelConfig(currentLevel).count;
+    while (asteroids.length < targetCount) spawnAsteroid();
   }
 
   render();
@@ -656,8 +665,8 @@ function updateShieldGlow(on) {
   if (!shipMarker) return;
   const img = shipMarker.getElement()?.querySelector('img');
   if (img) img.style.filter = on
-    ? 'drop-shadow(0 0 10px #00b4ff) drop-shadow(0 0 24px #00b4ff)'
-    : '';
+    ? 'drop-shadow(0 0 4px #fff) drop-shadow(0 0 14px #00b4ff) drop-shadow(0 0 32px #00b4ff) drop-shadow(0 0 56px rgba(0,180,255,0.75)) brightness(1.25)'
+    : 'drop-shadow(0 0 10px rgba(0,255,245,0.8)) drop-shadow(0 0 22px rgba(0,255,245,0.4))';
 }
 
 // ── Pause (one use per game) ──────────────────────────
@@ -721,8 +730,8 @@ function showLevelBanner(label) {
   document.body.appendChild(el);
   setTimeout(() => {
     el.classList.add('lt-fade');
-    setTimeout(() => el.remove(), 500);
-  }, 2200);
+    setTimeout(() => el.remove(), 350);
+  }, 1400);
 }
 
 // ── Game over ─────────────────────────────────────────
