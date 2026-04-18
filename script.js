@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.2.1";
+const VERSION = "v2.2.2";
 
 // ── Leaderboard API ──────────────────────────────────
 const LEADERBOARD_API = 'https://bombay-asteroids-1028845604936.europe-west1.run.app'; // Google Cloud Run
