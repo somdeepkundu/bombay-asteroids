@@ -16,6 +16,23 @@ CORS(app)
 
 ADMIN_KEY = 'sRxMAdjR7-n9Doq1YFkppw'
 
+# ── Profanity filter ──────────────────────────────────
+BAD_WORDS = [
+    'madarchod','maderchod','bhadwa','bhadwe','chutiya','chutiye',
+    'bhenchod','benchod','gaandu','gandu','loda','lund','randi',
+    'harami','behenchod','bhosdi','bsdk','mc','bc','fuck','shit',
+    'bitch','asshole','bastard','cunt','dick','pussy','nigger',
+    'nigga','whore','slut','motherfucker','fucker','fag','retard',
+]
+
+def clean_name(name):
+    """Replace name with ******* if it contains a bad word."""
+    lower = name.lower().replace(' ', '')
+    for word in BAD_WORDS:
+        if word in lower:
+            return '*******'
+    return name
+
 # Firestore client — explicit project ID for Cloud Run
 db = firestore.Client(project='bombay-asteroids')
 COLLECTION = 'scores'
@@ -69,7 +86,7 @@ def get_leaderboard():
         leaderboard = [
             {
                 "rank":      i + 1,
-                "name":      s.get('name'),
+                "name":      clean_name(s.get('name', '')),
                 "score":     s.get('score'),
                 "date":      s.get('date', ''),
                 "time":      s.get('time', ''),
@@ -95,7 +112,7 @@ def admin_scores():
         result = [
             {
                 "rank":      i + 1,
-                "name":      s.get('name'),
+                "name":      clean_name(s.get('name', '')),
                 "score":     s.get('score'),
                 "date":      s.get('date', ''),
                 "time":      s.get('time', ''),
