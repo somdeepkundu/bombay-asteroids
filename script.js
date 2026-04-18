@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.2.6";
+const VERSION = "v2.2.7";
 
 // ── Leaderboard API ──────────────────────────────────
 const LEADERBOARD_API = 'https://bombay-asteroids-1028845604936.europe-west1.run.app'; // Google Cloud Run
@@ -333,6 +333,38 @@ function moveAsteroids(dt) {
   }
 }
 
+// // --- NEW: Asteroid ↔ Asteroid collisions (Bouncing & Shattering) ---
+//   for (let i = 0; i < asteroids.length; i++) {
+//     for (let j = i + 1; j < asteroids.length; j++) {
+//       const a1 = asteroids[i];
+//       const a2 = asteroids[j];
+      
+//       if (isColliding(a1, a2)) {
+//         // 1. Separate them so they don't get stuck glued together
+//         const dx = a2.x - a1.x;
+//         const dy = a2.y - a1.y;
+//         const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+//         const overlap = (a1.w / 2 + a2.w / 2) - dist;
+
+//         a1.x -= (dx / dist) * (overlap / 2 + 1);
+//         a2.x += (dx / dist) * (overlap / 2 + 1);
+
+//         // 2. Exchange horizontal velocity (Elastic Bounce)
+//         const tempVx = a1.vx;
+//         a1.vx = a2.vx;
+//         a2.vx = tempVx;
+
+//         // 3. The "Sometime" factor: 10% chance they crush each other
+//         if (Math.random() < 1 && currentLevel >= 3) {
+//           explodeAt((a1.x + a2.x) / 2, (a1.y + a2.y) / 2);
+//           // Push them far offscreen so the reset logic grabs them naturally
+//           a1.y = H + 200; 
+//           a2.y = H + 200;
+//         }
+//       }
+//     }
+//   }
+
 function resetAsteroid(a) {
   a.y  = -30;
   a.x  = Math.random() * W;
@@ -575,12 +607,88 @@ function tick(ts) {
   }
 
   // Asteroid ↔ ship
+  // for (const a of asteroids) {
+  //   if (isColliding(a, ship)) {
+  //     a.s *= 0.95;
+  //     if (!shipShielded) {
+  //       ship.hl -= 20 * dt;
+  //       playExplosion();
+  //       if (ship.hl <= 0) { endGame("HULL BREACH"); return; }
+  //     }
+  //   }
+  // }
+
+  // v2
+  // // Asteroid ↔ ship
+  // for (const a of asteroids) {
+  //   if (isColliding(a, ship)) {
+  //     a.s *= 0.95;
+  //     if (!shipShielded) {
+  //       ship.hl -= 20 * dt;
+  //       playExplosion();
+
+  //       // --- NEW: Physics Knockback ---
+  //       const dx = ship.x - a.x;
+  //       const dy = ship.y - a.y;
+  //       const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+  //       ship.x += (dx / dist) * 18; // violently shove the ship 18px away
+  //       ship.y += (dy / dist) * 18;
+
+  //       // --- NEW: Visual Screen Shake ---
+  //       if (shipMarker) {
+  //         const img = shipMarker.getElement()?.querySelector('img');
+  //         if (img) {
+  //           img.classList.remove('shock-anim');
+  //           void img.offsetWidth; // trigger reflow to restart animation
+  //           img.classList.add('shock-anim');
+  //         }
+  //       }
+
+  //       if (ship.hl <= 0) { endGame("HULL BREACH"); return; }
+  //     }
+  //   }
+  // }
+
+  // v3 (final so far)
+  // Asteroid ↔ ship
   for (const a of asteroids) {
     if (isColliding(a, ship)) {
-      a.s *= 0.95;
+      
+      // --- UPGRADED: Physics Knockback ---
+      const dx = ship.x - a.x;
+      const dy = ship.y - a.y;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+      const nx = dx / dist; // Normalized vector X
+      const ny = dy / dist; // Normalized vector Y
+
+      // 1. Shove the ship away
+      ship.x += nx * 18;
+      ship.y += ny * 18;
+
+      // 2. CRITICAL: Clamp ship coordinates so it doesn't get pushed off-screen!
+      ship.x = Math.max(ship.w / 2, Math.min(W - ship.w / 2, ship.x));
+      ship.y = Math.max(ship.h / 2, Math.min(H - ship.h / 2, ship.y));
+
+      // 3. Bounce the asteroid away (Action & Reaction)
+      a.x -= nx * 15; 
+      a.vx = -nx * (a.s * 0.6); // Deflect its horizontal path
+      a.s *= 0.85;              // Slow it down slightly after impact
+
+      // --- Damage & Visuals ---
       if (!shipShielded) {
         ship.hl -= 20 * dt;
         playExplosion();
+
+        // Visual Screen Shake
+        if (shipMarker) {
+          const img = shipMarker.getElement()?.querySelector('img');
+          if (img) {
+            img.classList.remove('shock-anim');
+            void img.offsetWidth; // trigger reflow to restart animation
+            img.classList.add('shock-anim');
+          }
+        }
+
         if (ship.hl <= 0) { endGame("HULL BREACH"); return; }
       }
     }
@@ -775,6 +883,7 @@ function endGame(reason) {
   loadLeaderboard();
 }
 
+
 // ── Mobile / tablet detection ─────────────────────────
 function isMobileDevice() {
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -844,29 +953,24 @@ function showIntro(name, onComplete) {
 
   // Story lines — %NAME% replaced with player's name
   const lines = [
-    '17 July, 2027.',
-    '',
-    'No one saw them coming.',
-    '',
-    'A shower of asteroids — ancient rocks',
-    'drifting through space for a billion years —',
-    'found Earth today.',
-    '',
-    'And Earth wasn\'t ready.',
-    '',
-    'Mumbai — the City of Dreams.',
-    'Twelve million people. Twelve million lives.',
-    'The fishermen of Versova.',
-    'The dancers of Dharavi.',
-    'Children chasing kites on Marine Drive.',
-    '',
-    'All of them — looking up at the sky.',
-    '',
-    'You are %NAME%.',
-    'A pilot. Up there. Between them and the rocks.',
-    '',
-    'The city doesn\'t need a hero.',
-    'It just needs you — right now.',
+    'July 17, 2027.',
+        '',
+        'The sky broke. Ancient, billion-year-old stone,',
+        'silent for eons, screamed into the atmosphere.',
+        'Earth wasn\'t ready.',
+        '',
+        'Mumbai. The City of Dreams—now a city of shadows.',
+        'Over 2.2 crore lives held their breath.',
+        'From the salt-sprayed nets of Versova',
+        'to the pulsing rhythm of Dharavi,',
+        'every eye turned upward.',
+        '',
+        'The city doesn\'t need a hero.',
+        'It needs a miracle.',
+        '',
+        'You are %NAME%.',
+        'A pilot suspended in the dead space between',
+        'a crushing fate and 22 million souls.',
   ];
 
   const fullText = lines.join('\n');
