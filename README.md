@@ -14,7 +14,7 @@ A browser-based shoot'em'up game built with **vanilla HTML, CSS, and JavaScript*
 </p>
 
 **Live:** [somdeepkundu.github.io/bombay-asteroids](https://somdeepkundu.github.io/bombay-asteroids/)  
-**Leaderboard API:** [bombay-asteroids-1028845604936.europe-west1.run.app](https://bombay-asteroids-1028845604936.europe-west1.run.app/)
+
 
 ---
 
