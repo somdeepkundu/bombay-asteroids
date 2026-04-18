@@ -1,16 +1,32 @@
 # Bombay Asteroids
 
-A browser-based shoot'em'up game built with **vanilla HTML, CSS, and JavaScript** — no canvas, no frameworks, no external dependencies. Dodge and destroy oncoming asteroids above Mumbai before they drain your health!
+A browser-based shoot'em'up game built with **vanilla HTML, CSS, and JavaScript** — no canvas, no frameworks. Dodge and destroy oncoming asteroids above Mumbai before they drain your health!
 
 <p align="center">
   <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" />
   <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white" />
   <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" />
   <img src="https://img.shields.io/badge/Leaflet-199900?style=for-the-badge&logo=leaflet&logoColor=white" />
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" />
+  <img src="https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white" />
+  <img src="https://img.shields.io/badge/Firestore-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" />
+  <img src="https://img.shields.io/badge/Cloud_Run-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white" />
 </p>
 
-**Live:** [bombay-asteroids.streamlit.app](https://bombay-asteroids.streamlit.app/)  
-**GitHub Pages:** [somdeepkundu.github.io/bombay-asteroids](https://somdeepkundu.github.io/bombay-asteroids/)
+**Live:** [somdeepkundu.github.io/bombay-asteroids](https://somdeepkundu.github.io/bombay-asteroids/)  
+**Leaderboard API:** [bombay-asteroids-1028845604936.europe-west1.run.app](https://bombay-asteroids-1028845604936.europe-west1.run.app/)
+
+---
+
+## Story
+
+> *17 July, 2027. No one saw them coming.*
+>
+> *A shower of asteroids — ancient rocks drifting through space for a billion years — found Earth today.*
+> *Mumbai — the City of Dreams — is in their path.*
+>
+> *You are a pilot. Up there. Between them and the rocks.*
+> *The city doesn't need a hero. It just needs you — right now.*
 
 ---
 
@@ -36,6 +52,7 @@ A browser-based shoot'em'up game built with **vanilla HTML, CSS, and JavaScript*
         <li>Pilot your spaceship to dodge incoming asteroids</li>
         <li>Shoot asteroids to destroy them and earn <strong>+10 points</strong> each</li>
         <li>Survive the countdown timer — each level has a time limit</li>
+        <li>Collect powerups to restore health or gain extra time</li>
         <li>Game ends when health reaches zero or timer runs out</li>
       </ul>
     </td>
@@ -46,28 +63,43 @@ A browser-based shoot'em'up game built with **vanilla HTML, CSS, and JavaScript*
 
 ## Features
 
-- **Infinite procedural difficulty** — 6+ levels generated on the fly, with no ceiling. Each level increases asteroid count, speed, and introduces chaotic directional angles
-- **Leaflet.js map background** — game world centered on IIT Bombay, Mumbai with parallax drift effect (simulates forward flight)
+### 🎮 Core Gameplay
+- **Infinite procedural difficulty** — 6+ levels generated on the fly, no ceiling. Each level increases asteroid count, speed, and introduces chaotic directional angles
+- **Leaflet.js map background** — game world centered on IIT Bombay, Mumbai with parallax drift effect
 - **Neon arcade theme** — synthwave-inspired CSS with glowing text, animated starfield, and pulsing HUD elements
 - **Smooth movement** — delta-time based physics for consistent speed across all frame rates
-- **Virtual analog joystick** — mobile/tablet friendly with proportional speed control (slow near center, fast at edges)
-- **Shooting mechanics** — fire green plasma bolts to destroy asteroids before they hit you
-- **Auto-fire at Level 10+** — hold SPACE (or FIRE button) for continuous burst fire
 - **Collision detection** — circle-based distance calculations for spaceship-asteroid and shot-asteroid interactions
-- **Health & scoring system** — gradient health bar, zero-padded score, level indicator, and countdown timer
-- **Countdown timer** — per-level time pressure that shrinks as you advance; time out = game over
-- **Dual powerups** — health (every 15s) and time boost (every 22s) that fall from the sky
+- **Health & scoring system** — gradient health bar, zero-padded score, level indicator, countdown timer
+
+### 🕹️ Controls & Input
+- **Virtual analog joystick** — mobile/tablet friendly with proportional speed control (slow near center, fast at edges)
+- **Shooting mechanics** — fire green plasma bolts to destroy asteroids
+- **Auto-fire at Level 10+** — hold SPACE (or FIRE button) for continuous burst fire
+- **Sound mute toggle** — press M or click 🔊 button
+
+### ⚡ Powerups & Mechanics
+- **Dual powerups** — health drop every 15s and time boost every 22s fall from the sky
 - **Roll/Pitch locks** — from Level 4 onwards, randomly lock horizontal (roll) or vertical (pitch) movement with 5-second warning
-- **Sound effects** — retro arcade audio (laser, explosion, powerup chimes, level-up fanfare) generated with Web Audio API
-- **Sound mute toggle** — press M or click 🔊 button to toggle audio
-- **Persistent player name** — your name is saved to localStorage, no re-entry needed
-- **Game over screen** — dramatic overlay showing final score, level reached, and credits
+- **Countdown timer** — per-level time pressure that shrinks as you advance; time out = game over
+
+### 🔊 Audio
+- **5 sound effects** — laser, explosion, health pickup, time boost, level-up fanfare
+- **All generated with Web Audio API** — zero external audio files
+
+### 🏆 Global Leaderboard
+- **Open-source backend** — Python Flask API deployed on Google Cloud Run
+- **Persistent storage** — Google Cloud Firestore (data survives forever)
+- **Top 10 on game-over screen** — see where you rank globally the moment you die
+- **Tracks**: player name, score, date (dd/mm), time (IST), game version
+
+### 🎬 Experience
+- **Cinematic intro** — typewriter story plays on first visit only (Mumbai, City of Dreams)
+- **Persistent player name** — saved to localStorage, no re-entry needed
+- **Dramatic game-over screen** — final score, level reached, global leaderboard, credits
 
 ---
 
 ## Difficulty Progression
-
-The game generates difficulty on the fly — no hardcoded level caps.
 
 | Level | Score to reach | Time limit | Asteroids | Horizontal drift | Speed range |
 |---|---|---|---|---|---|
@@ -83,7 +115,7 @@ The game generates difficulty on the fly — no hardcoded level caps.
 
 ## How to Run
 
-No build tools or servers needed.
+No build tools needed for the game frontend.
 
 ### Option 1: Open directly in browser
 
@@ -102,9 +134,42 @@ python -m http.server 8000
 # Then visit http://localhost:8000
 ```
 
-### Option 3: Streamlit Cloud (live)
+### Option 3: Live on GitHub Pages
 
-Visit **[bombay-asteroids.streamlit.app](https://bombay-asteroids.streamlit.app/)** — auto-deploys on every push.
+Visit **[somdeepkundu.github.io/bombay-asteroids](https://somdeepkundu.github.io/bombay-asteroids/)** — auto-deploys on every push to `main`.
+
+---
+
+## Leaderboard Backend
+
+The global leaderboard is a separate open-source Flask API.
+
+### Architecture
+
+```
+Game (GitHub Pages) ──HTTPS──> Flask API (Google Cloud Run) ──> Firestore Database
+```
+
+### Running locally
+
+```bash
+cd backend
+pip install -r requirements.txt
+python app.py
+# API at http://localhost:5000
+```
+
+### API Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/score` | Submit a score `{name, score, version}` |
+| `GET` | `/api/leaderboard` | Top 10 scores |
+| `GET` | `/api/health` | Health check |
+
+### Deployment
+
+Deployed on **Google Cloud Run** with **Firestore** for persistent storage. See `LEADERBOARD_SETUP.md` for full deployment guide.
 
 ---
 
@@ -112,12 +177,18 @@ Visit **[bombay-asteroids.streamlit.app](https://bombay-asteroids.streamlit.app/
 
 ```
 bombay-asteroids/
-├── index.html
-├── script.js
-├── style.css
-├── app.py
-├── requirements.txt
+├── index.html               # Game markup
+├── script.js                # Game logic + leaderboard API calls
+├── style.css                # Neon arcade styles
 ├── README.md
+├── LEADERBOARD_SETUP.md     # Backend deployment guide
+├── backend/
+│   ├── app.py               # Flask leaderboard API (Firestore)
+│   ├── requirements.txt     # Python dependencies
+│   ├── Dockerfile           # For Google Cloud Run
+│   └── README.md
+├── admin/
+│   └── dashboard.html       # Private analytics dashboard (local use)
 └── assets/graphics/
     ├── spaceship_full.svg
     ├── asteroid1.svg
@@ -125,6 +196,22 @@ bombay-asteroids/
     ├── green_projectile.svg
     └── explosion.svg
 ```
+
+---
+
+## Version History
+
+| Version | What changed |
+|---|---|
+| v1.0 | Base game — movement, shooting, asteroids |
+| v2.0 | Leaflet map, procedural difficulty, powerups |
+| v2.1.0 | Time booster, analog joystick, auto-fire (Lv10+), roll/pitch locks |
+| v2.1.1 | Web Audio sound effects (5 sounds) |
+| v2.1.2 | Collision alert sound, persistent player name |
+| v2.1.3 | Global leaderboard — Flask + Cloud Run backend |
+| v2.1.4 | Cinematic intro story screen (first visit only) |
+| v2.2.0 | Launch button mobile fix |
+| v2.2.1 | Score metadata — date (dd/mm), time (IST), version |
 
 ---
 
@@ -136,9 +223,13 @@ Started with [programming2point0/asteroids](https://github.com/programming2point
 - Leaflet.js map integration with parallax drift
 - Infinite procedural difficulty generation
 - Per-level countdown timer mechanic
-- Asteroid directional angles (introduces complexity)
-- Health powerups (resource management)
-- Streamlit Cloud deployment (bundled assets)
+- Asteroid directional angles
+- Health & time powerups
+- Virtual analog joystick
+- Web Audio API sound system
+- Roll/Pitch lock mechanic
+- Global leaderboard (Flask + Firestore + Cloud Run)
+- Cinematic story intro
 
 ### Key concepts
 
@@ -149,7 +240,9 @@ Started with [programming2point0/asteroids](https://github.com/programming2point
 | **Procedural generation** | getLevelConfig(level) scales difficulty forever |
 | **Collision detection** | Euclidean distance vs. combined radii (circle-based) |
 | **Physics** | Velocity-based movement with sub-pixel accuracy |
-| **Deployment** | GitHub Pages (static) + Streamlit Cloud (dynamic) |
+| **REST API** | Flask backend with JSON endpoints |
+| **Cloud deployment** | GitHub Pages (static) + Google Cloud Run (dynamic) |
+| **NoSQL database** | Firestore for persistent leaderboard storage |
 
 ---
 
@@ -164,7 +257,8 @@ Started with [programming2point0/asteroids](https://github.com/programming2point
   - [Shots](https://www.freepik.com/free-vector/game-handgun-blaster-shoot-light-effect_133958192.htm) by upklyak
   - [Explosion](https://www.freepik.com/free-vector/cartoon-bomb-explosion-storyboard-animation_20902933.htm) by upklyak
 - **Map tiles**: [Stadia Maps](https://stadiamaps.com/)
-- **Framework**: [Leaflet.js](https://leafletjs.com/)
+- **Map framework**: [Leaflet.js](https://leafletjs.com/)
+- **Backend**: [Flask](https://flask.palletsprojects.com/) + [Google Cloud Run](https://cloud.google.com/run) + [Firestore](https://cloud.google.com/firestore)
 
 ---
 
