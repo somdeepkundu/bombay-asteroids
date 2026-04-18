@@ -14,8 +14,8 @@ CORS(app)
 
 ADMIN_KEY = 'sRxMAdjR7-n9Doq1YFkppw'
 
-# Firestore client — auto-authenticates in Cloud Run
-db = firestore.Client()
+# Firestore client — explicit project ID for Cloud Run
+db = firestore.Client(project='bombay-asteroids')
 COLLECTION = 'scores'
 
 @app.route('/api/score', methods=['POST', 'OPTIONS'])
@@ -110,6 +110,15 @@ def admin_scores():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+@app.route('/api/debug', methods=['GET'])
+def debug():
+    """Debug endpoint to test Firestore connection."""
+    try:
+        db.collection(COLLECTION).limit(1).stream()
+        return jsonify({"firestore": "connected", "project": "bombay-asteroids"}), 200
+    except Exception as e:
+        return jsonify({"firestore": "error", "detail": str(e)}), 500
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
