@@ -15,74 +15,54 @@
       min-height: 100vh;
       padding: 32px 24px;
     }
-    h1 {
-      color: #00fff5;
-      font-size: 20px;
-      letter-spacing: 4px;
-      text-shadow: 0 0 16px #00fff5;
-      margin-bottom: 6px;
-    }
-    .subtitle { color: #556; font-size: 11px; letter-spacing: 2px; margin-bottom: 36px; }
+    h1 { color: #00fff5; font-size: 20px; letter-spacing: 4px; text-shadow: 0 0 16px #00fff5; margin-bottom: 6px; }
+    .subtitle { color: #778; font-size: 11px; letter-spacing: 2px; margin-bottom: 36px; }
 
     /* ── Stat cards ── */
-    .stats-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 36px; }
-    .stat-card {
-      background: rgba(0,255,245,0.05);
-      border: 1px solid rgba(0,255,245,0.15);
-      border-radius: 8px;
-      padding: 18px 28px;
-      min-width: 140px;
-    }
-    .stat-card.hot .stat-value { color: #ff006e; text-shadow: 0 0 12px #ff006e; }
-    .stat-label { font-size: 10px; letter-spacing: 2px; color: #556; margin-bottom: 8px; }
+    .stats-row  { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 36px; }
+    .stat-card  { background: rgba(0,255,245,0.05); border: 1px solid rgba(0,255,245,0.18); border-radius: 8px; padding: 18px 28px; min-width: 140px; }
+    .stat-label { font-size: 10px; letter-spacing: 2px; color: #889; margin-bottom: 8px; }
     .stat-value { font-size: 28px; color: #00fff5; text-shadow: 0 0 12px #00fff5; }
+    .stat-card.hot .stat-value { color: #ff006e; text-shadow: 0 0 12px #ff006e; }
 
-    /* ── Charts ── */
-    .chart-wrap {
-      background: rgba(0,10,40,0.6);
-      border: 1px solid rgba(0,255,245,0.1);
-      border-radius: 8px;
-      padding: 24px;
-      margin-bottom: 28px;
-    }
+    /* ── Chart panels ── */
+    .chart-wrap { background: rgba(0,10,40,0.6); border: 1px solid rgba(0,255,245,0.12); border-radius: 8px; padding: 24px; margin-bottom: 28px; }
     .chart-title { font-size: 11px; letter-spacing: 3px; color: #00fff5; margin-bottom: 4px; }
-    .chart-sub   { font-size: 9px; letter-spacing: 1px; color: #445; margin-bottom: 18px; }
+    .chart-sub   { font-size: 9px; letter-spacing: 1px; color: #778; margin-bottom: 18px; }
 
     /* ── Table ── */
-    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    table { width: 100%; border-collapse: collapse; }
     th {
       text-align: left;
-      color: #00fff5;
       font-size: 10px;
       letter-spacing: 2px;
       padding: 10px 12px;
-      border-bottom: 1px solid rgba(0,255,245,0.2);
+      border-bottom: 1px solid rgba(0,255,245,0.25);
       cursor: pointer;
       user-select: none;
       white-space: nowrap;
-      transition: color 0.15s;
+      transition: color 0.15s, background 0.15s;
     }
-    th:hover { color: #fff; }
-    th.sort-asc::after  { content: ' ▲'; color: #ffd60a; }
-    th.sort-desc::after { content: ' ▼'; color: #ffd60a; }
-    th.sort-none::after { content: ' ⇅'; color: #334; font-size: 9px; }
+    th:hover { background: rgba(0,255,245,0.06); }
+    th.active-col { color: #ffd60a !important; }
+    th.inactive-col { color: #00fff5; }
     td {
       padding: 10px 12px;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
       font-family: 'Courier New', monospace;
       font-size: 13px;
     }
     tr:hover td { background: rgba(0,255,245,0.04); }
-    .rank-1 td:first-child { color: #ffd700; }
-    .rank-2 td:first-child { color: #c0c0c0; }
-    .rank-3 td:first-child { color: #cd7f32; }
-    .name-cell  { color: #fff; }
+    .rank-1 td:first-child { color: #ffd700; font-weight: bold; }
+    .rank-2 td:first-child { color: #c0c0c0; font-weight: bold; }
+    .rank-3 td:first-child { color: #cd7f32; font-weight: bold; }
+    .name-cell  { color: #e8f0f8; }
     .score-cell { color: #00fff5; font-weight: bold; }
     .level-cell { color: #ffd60a; font-weight: bold; }
-    .time-cell  { color: #445; font-size: 11px; }
-    .ver-cell   { color: #334; font-size: 10px; }
+    .date-cell  { color: #aabbcc; font-size: 12px; }
+    .ver-cell   { color: #8899aa; font-size: 11px; }
 
-    #status { font-size: 11px; letter-spacing: 2px; color: #445; margin-bottom: 24px; }
+    #status { font-size: 11px; letter-spacing: 2px; color: #778; margin-bottom: 24px; }
     .loading { color: #00fff5; animation: blink 1s step-end infinite; }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
   </style>
@@ -94,40 +74,36 @@
   <div id="status" class="loading">FETCHING DATA...</div>
   <div class="stats-row" id="stats-row" style="display:none"></div>
 
-  <!-- Chart 1: Top scores -->
   <div class="chart-wrap" id="chart-wrap" style="display:none">
     <div class="chart-title">TOP SCORES</div>
     <div class="chart-sub">BEST 15 PLAYERS BY SCORE</div>
     <canvas id="scoreChart" height="100"></canvas>
   </div>
 
-  <!-- Chart 2: Death heatmap -->
   <div class="chart-wrap" id="heatmap-wrap" style="display:none">
     <div class="chart-title">☄️ DEATH HEATMAP — BY LEVEL</div>
     <div class="chart-sub">HOW MANY PLAYERS DIED AT EACH LEVEL</div>
     <canvas id="heatmapChart" height="90"></canvas>
   </div>
 
-  <!-- Chart 3: Daily active players -->
   <div class="chart-wrap" id="dap-wrap" style="display:none">
     <div class="chart-title">📅 DAILY ACTIVE PLAYERS</div>
     <div class="chart-sub">UNIQUE PLAYERS PER DAY</div>
     <canvas id="dapChart" height="80"></canvas>
   </div>
 
-  <!-- Table: all scores, sortable -->
   <div class="chart-wrap" id="table-wrap" style="display:none">
     <div class="chart-title">ALL SCORES</div>
-    <div class="chart-sub">CLICK ANY COLUMN HEADER TO SORT</div>
+    <div class="chart-sub">CLICK ANY COLUMN HEADER TO SORT ↕</div>
     <table>
       <thead>
-        <tr>
-          <th data-col="rank"      class="sort-asc"  onclick="sortBy('rank')"     >#</th>
-          <th data-col="name"      class="sort-none" onclick="sortBy('name')"     >NAME</th>
-          <th data-col="score"     class="sort-none" onclick="sortBy('score')"    >SCORE</th>
-          <th data-col="level"     class="sort-none" onclick="sortBy('level')"    >LEVEL</th>
-          <th data-col="timestamp" class="sort-none" onclick="sortBy('timestamp')">DATE ↕</th>
-          <th data-col="version"   class="sort-none" onclick="sortBy('version')"  >VER</th>
+        <tr id="table-head">
+          <th data-col="rank">      #         </th>
+          <th data-col="name">      NAME       </th>
+          <th data-col="score">     SCORE      </th>
+          <th data-col="level">     LEVEL      </th>
+          <th data-col="timestamp"> DATE / TIME </th>
+          <th data-col="version">   VER        </th>
         </tr>
       </thead>
       <tbody id="score-table"></tbody>
@@ -137,16 +113,20 @@
 <script>
 const BASE = 'https://bombay-asteroids-1028845604936.europe-west1.run.app/api/admin?key=';
 
-// ── Sort state ─────────────────────────────────────────
 let allScores = [];
 let sortCol   = 'rank';
-let sortDir   = 'asc';   // 'asc' | 'desc'
+let sortDir   = 'asc';
+
+const COL_LABELS = {
+  rank: '#', name: 'NAME', score: 'SCORE',
+  level: 'LEVEL', timestamp: 'DATE / TIME', version: 'VER'
+};
 
 const CHART_DEFAULTS = {
   plugins: { legend: { display: false } },
   scales: {
-    x: { ticks: { color: '#778', font: { size: 10 }, maxRotation: 45 }, grid: { color: 'rgba(255,255,255,0.05)' } },
-    y: { ticks: { color: '#778', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+    x: { ticks: { color: '#889', font: { size: 10 }, maxRotation: 45 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+    y: { ticks: { color: '#889', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
   }
 };
 
@@ -157,37 +137,36 @@ function promptKey() {
   return null;
 }
 
-// Heat-map color: cool cyan → yellow → hot red (0–1 ratio)
 function heatColor(ratio) {
   if (ratio < 0.5) {
     const t = ratio * 2;
-    return `rgba(${Math.round(255*t)}, ${Math.round(255 - 40*t)}, ${Math.round(245*(1-t))}, ${0.45 + 0.3*t})`;
-  } else {
-    const t = (ratio - 0.5) * 2;
-    return `rgba(255, ${Math.round(215*(1-t))}, 0, ${0.75 + 0.2*t})`;
+    return `rgba(${Math.round(255*t)},${Math.round(255-40*t)},${Math.round(245*(1-t))},${0.45+0.3*t})`;
   }
+  const t = (ratio - 0.5) * 2;
+  return `rgba(255,${Math.round(215*(1-t))},0,${0.75+0.2*t})`;
 }
 
-// ── Sort & re-render table ─────────────────────────────
+// ── Sort ──────────────────────────────────────────────
 function sortBy(col) {
-  if (sortCol === col) {
-    sortDir = sortDir === 'asc' ? 'desc' : 'asc';
-  } else {
-    sortCol = col;
-    sortDir = col === 'timestamp' ? 'desc' : 'desc'; // newest first by default for date
-  }
+  sortDir = (sortCol === col && sortDir === 'desc') ? 'asc' : 'desc';
+  sortCol = col;
   updateTableHeaders();
   renderTable();
 }
 
 function updateTableHeaders() {
-  document.querySelectorAll('th[data-col]').forEach(th => {
-    const col = th.dataset.col;
+  document.querySelectorAll('#table-head th').forEach(th => {
+    const col   = th.dataset.col;
+    const label = COL_LABELS[col] || col;
     if (col === sortCol) {
-      th.className = sortDir === 'asc' ? 'sort-asc' : 'sort-desc';
+      th.textContent = label + (sortDir === 'asc' ? '  ▲' : '  ▼');
+      th.className   = 'active-col';
     } else {
-      th.className = 'sort-none';
+      th.textContent = label + '  ⇅';
+      th.className   = 'inactive-col';
     }
+    // Re-bind click (textContent replace removes nothing but ensure onclick)
+    th.onclick = () => sortBy(col);
   });
 }
 
@@ -195,42 +174,32 @@ function getSortedScores() {
   return [...allScores].sort((a, b) => {
     let va = a[sortCol] ?? '';
     let vb = b[sortCol] ?? '';
-
-    // Numeric columns
-    if (sortCol === 'score' || sortCol === 'level' || sortCol === 'rank') {
-      va = Number(va) || 0;
-      vb = Number(vb) || 0;
+    if (['score', 'level', 'rank'].includes(sortCol)) {
+      va = Number(va) || 0; vb = Number(vb) || 0;
       return sortDir === 'asc' ? va - vb : vb - va;
     }
-
-    // String columns (name, timestamp, version)
-    va = String(va).toLowerCase();
-    vb = String(vb).toLowerCase();
-    if (va < vb) return sortDir === 'asc' ? -1 : 1;
-    if (va > vb) return sortDir === 'asc' ?  1 : -1;
-    return 0;
+    va = String(va).toLowerCase(); vb = String(vb).toLowerCase();
+    const cmp = va < vb ? -1 : va > vb ? 1 : 0;
+    return sortDir === 'asc' ? cmp : -cmp;
   });
 }
 
 function renderTable() {
-  const tbody  = document.getElementById('score-table');
-  const sorted = getSortedScores();
-  tbody.innerHTML = sorted.map((r, i) => {
-    const displayRank = i + 1;
-    const topClass    = displayRank <= 3 && sortCol === 'rank' ? `rank-${displayRank}` : '';
-    return `
-      <tr class="${topClass}">
-        <td>${r.rank}</td>
-        <td class="name-cell">${r.name}</td>
-        <td class="score-cell">${r.score}</td>
-        <td class="level-cell">${r.level ? 'Lv ' + r.level : '—'}</td>
-        <td class="time-cell">${r.timestamp || '—'}</td>
-        <td class="ver-cell">${r.version || '—'}</td>
-      </tr>`;
+  document.getElementById('score-table').innerHTML = getSortedScores().map((r, i) => {
+    const pos      = i + 1;
+    const topClass = pos <= 3 && sortCol === 'rank' ? `rank-${pos}` : '';
+    return `<tr class="${topClass}">
+      <td>${r.rank}</td>
+      <td class="name-cell">${r.name}</td>
+      <td class="score-cell">${r.score}</td>
+      <td class="level-cell">${r.level ? 'Lv ' + r.level : '—'}</td>
+      <td class="date-cell">${r.timestamp || '—'}</td>
+      <td class="ver-cell">${r.version || '—'}</td>
+    </tr>`;
   }).join('');
 }
 
-// ── Fetch & render ─────────────────────────────────────
+// ── Load & render ─────────────────────────────────────
 async function load() {
   let key = getKey();
   if (!key) { key = promptKey(); if (!key) return; }
@@ -250,51 +219,45 @@ async function load() {
 }
 
 function render(data) {
-  allScores     = data.scores || [];
-  const total   = data.total  || 0;
-
+  allScores = data.scores || [];
   document.getElementById('status').style.display = 'none';
 
-  // ── Death level distribution ───────────────────────
+  // Death level distribution
   const levelCounts = {};
-  allScores.forEach(r => {
-    const lv = r.level || 0;
-    if (lv > 0) levelCounts[lv] = (levelCounts[lv] || 0) + 1;
-  });
-  const maxLv    = Object.keys(levelCounts).length ? Math.max(...Object.keys(levelCounts).map(Number)) : 0;
-  const lvLabels = Array.from({length: maxLv}, (_, i) => `Lv ${i + 1}`);
-  const lvData   = Array.from({length: maxLv}, (_, i) => levelCounts[i + 1] || 0);
+  allScores.forEach(r => { const lv = r.level||0; if (lv > 0) levelCounts[lv] = (levelCounts[lv]||0)+1; });
+  const maxLv     = Object.keys(levelCounts).length ? Math.max(...Object.keys(levelCounts).map(Number)) : 0;
+  const lvLabels  = Array.from({length: maxLv}, (_, i) => `Lv ${i+1}`);
+  const lvData    = Array.from({length: maxLv}, (_, i) => levelCounts[i+1] || 0);
   const maxDeaths = Math.max(...lvData, 1);
   const hardestLv = lvData.length ? lvData.indexOf(Math.max(...lvData)) + 1 : 0;
 
-  // ── Daily unique players ───────────────────────────
-  const byDayPlayers = {};
+  // Daily unique players
+  const byDay = {};
   allScores.forEach(r => {
     const day = r.timestamp ? r.timestamp.split(' ')[0] : null;
     if (!day) return;
-    if (!byDayPlayers[day]) byDayPlayers[day] = new Set();
-    byDayPlayers[day].add((r.name || '').toLowerCase());
+    if (!byDay[day]) byDay[day] = new Set();
+    byDay[day].add((r.name||'').toLowerCase());
   });
-  const days      = Object.keys(byDayPlayers).sort();
-  const dayLabels = days.map(d => { const [y,m,dd] = d.split('-'); return `${dd}/${m}`; });
-  const dayCounts = days.map(d => byDayPlayers[d].size);
-  const todayKey  = days[days.length - 1] || '';
-  const todayCount = todayKey ? (byDayPlayers[todayKey]?.size || 0) : 0;
+  const days      = Object.keys(byDay).sort();
+  const dayLabels = days.map(d => { const [,m,dd] = d.split('-'); return `${dd}/${m}`; });
+  const dayCounts = days.map(d => byDay[d].size);
+  const todayCount = days.length ? byDay[days[days.length-1]].size : 0;
 
-  // ── Stats ──────────────────────────────────────────
+  // Stats
   const topScore = allScores.length ? allScores[0].score : 0;
-  const avg      = allScores.length ? Math.round(allScores.reduce((s, r) => s + r.score, 0) / allScores.length) : 0;
-  const names    = new Set(allScores.map(r => (r.name || '').toLowerCase())).size;
+  const avg      = allScores.length ? Math.round(allScores.reduce((s,r)=>s+r.score,0)/allScores.length) : 0;
+  const names    = new Set(allScores.map(r=>(r.name||'').toLowerCase())).size;
 
   const statsRow = document.getElementById('stats-row');
   statsRow.style.display = 'flex';
   statsRow.innerHTML = `
-    <div class="stat-card"><div class="stat-label">TOTAL PLAYS</div><div class="stat-value">${total}</div></div>
+    <div class="stat-card"><div class="stat-label">TOTAL PLAYS</div><div class="stat-value">${data.total||0}</div></div>
     <div class="stat-card"><div class="stat-label">UNIQUE PLAYERS</div><div class="stat-value">${names}</div></div>
     <div class="stat-card"><div class="stat-label">TODAY (ACTIVE)</div><div class="stat-value">${todayCount}</div></div>
     <div class="stat-card"><div class="stat-label">TOP SCORE</div><div class="stat-value">${topScore}</div></div>
     <div class="stat-card"><div class="stat-label">AVG SCORE</div><div class="stat-value">${avg}</div></div>
-    ${hardestLv > 0 ? `<div class="stat-card hot"><div class="stat-label">☠ HARDEST LEVEL</div><div class="stat-value">LV ${hardestLv}</div></div>` : ''}
+    ${hardestLv>0?`<div class="stat-card hot"><div class="stat-label">☠ HARDEST LEVEL</div><div class="stat-value">LV ${hardestLv}</div></div>`:''}
   `;
 
   if (!allScores.length) {
@@ -303,83 +266,48 @@ function render(data) {
     return;
   }
 
-  // ── Chart 1: Top 15 by score ───────────────────────
+  // Chart 1: top 15
   const top15 = allScores.slice(0, 15);
   document.getElementById('chart-wrap').style.display = 'block';
   new Chart(document.getElementById('scoreChart'), {
     type: 'bar',
     data: {
       labels: top15.map(r => r.name),
-      datasets: [{
-        data: top15.map(r => r.score),
-        backgroundColor: top15.map((_, i) =>
-          i === 0 ? 'rgba(255,215,0,0.75)' :
-          i === 1 ? 'rgba(192,192,192,0.6)' :
-          i === 2 ? 'rgba(205,127,50,0.6)' :
-          'rgba(0,255,245,0.35)'
-        ),
-        borderColor: 'rgba(0,255,245,0.5)',
-        borderWidth: 1,
-        borderRadius: 4,
-      }]
-    },
-    options: CHART_DEFAULTS
+      datasets: [{ data: top15.map(r=>r.score),
+        backgroundColor: top15.map((_,i)=>i===0?'rgba(255,215,0,0.75)':i===1?'rgba(192,192,192,0.6)':i===2?'rgba(205,127,50,0.6)':'rgba(0,255,245,0.35)'),
+        borderColor:'rgba(0,255,245,0.5)', borderWidth:1, borderRadius:4 }]
+    }, options: CHART_DEFAULTS
   });
 
-  // ── Chart 2: Death heatmap ────────────────────────
-  if (lvData.some(v => v > 0)) {
+  // Chart 2: death heatmap
+  if (lvData.some(v=>v>0)) {
     document.getElementById('heatmap-wrap').style.display = 'block';
     new Chart(document.getElementById('heatmapChart'), {
       type: 'bar',
-      data: {
-        labels: lvLabels,
-        datasets: [{
-          data: lvData,
-          backgroundColor: lvData.map(v => heatColor(v / maxDeaths)),
-          borderColor:     lvData.map(v => heatColor(Math.min(v / maxDeaths + 0.2, 1))),
-          borderWidth: 1,
-          borderRadius: 4,
-        }]
-      },
-      options: {
-        ...CHART_DEFAULTS,
-        plugins: {
-          legend: { display: false },
-          tooltip: { callbacks: { label: ctx => ` ${ctx.raw} death${ctx.raw !== 1 ? 's' : ''}` } }
-        }
-      }
+      data: { labels: lvLabels, datasets: [{
+        data: lvData,
+        backgroundColor: lvData.map(v=>heatColor(v/maxDeaths)),
+        borderColor:     lvData.map(v=>heatColor(Math.min(v/maxDeaths+0.2,1))),
+        borderWidth:1, borderRadius:4
+      }]},
+      options: { ...CHART_DEFAULTS, plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: ctx=>`  ${ctx.raw} death${ctx.raw!==1?'s':''}` }}}}
     });
   }
 
-  // ── Chart 3: Daily active players ─────────────────
-  if (days.length > 0) {
+  // Chart 3: daily active players
+  if (days.length) {
     document.getElementById('dap-wrap').style.display = 'block';
     new Chart(document.getElementById('dapChart'), {
       type: 'line',
-      data: {
-        labels: dayLabels,
-        datasets: [{
-          data: dayCounts,
-          borderColor: '#00fff5',
-          backgroundColor: 'rgba(0,255,245,0.08)',
-          tension: 0.35,
-          fill: true,
-          pointBackgroundColor: '#00fff5',
-          pointRadius: 4,
-          pointHoverRadius: 6,
-        }]
-      },
-      options: {
-        ...CHART_DEFAULTS,
-        scales: {
-          ...CHART_DEFAULTS.scales,
-          y: { ...CHART_DEFAULTS.scales.y, ticks: { ...CHART_DEFAULTS.scales.y.ticks, stepSize: 1, precision: 0 } }
-        }
-      }
+      data: { labels: dayLabels, datasets: [{
+        data: dayCounts, borderColor:'#00fff5', backgroundColor:'rgba(0,255,245,0.08)',
+        tension:0.35, fill:true, pointBackgroundColor:'#00fff5', pointRadius:4, pointHoverRadius:6
+      }]},
+      options: { ...CHART_DEFAULTS, scales:{...CHART_DEFAULTS.scales, y:{...CHART_DEFAULTS.scales.y, ticks:{...CHART_DEFAULTS.scales.y.ticks, stepSize:1, precision:0}}}}
     });
   }
 
-  // ── Sortable table ─────────────────────────────────
+  // Sortable table
   document.getElementById('table-wrap').style.display = 'block';
   updateTableHeaders();
   renderTable();
