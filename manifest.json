@@ -1,0 +1,19 @@
+{
+  "name": "Bombay Asteroids",
+  "short_name": "BombayAsteroids",
+  "description": "Defend Mumbai from asteroids! Arcade shooter above the City of Dreams.",
+  "start_url": "/bombay-asteroids/",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#000010",
+  "theme_color": "#000010",
+  "icons": [
+    {
+      "src": "assets/graphics/spaceship_full.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["games", "entertainment"]
+}

@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.2.2";
+const VERSION = "v2.2.3";
 
 // ── Leaderboard API ──────────────────────────────────
 const LEADERBOARD_API = 'https://bombay-asteroids-1028845604936.europe-west1.run.app'; // Google Cloud Run
@@ -16,6 +16,8 @@ const HEALTH_SVG = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/s
 
 // Clock (left) + plus sign (right) = time boost pickup
 const TIMEBOOST_SVG = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230a0a2e' opacity='0.9'/><circle cx='14' cy='19' r='9' fill='none' stroke='%2300fff5' stroke-width='2'/><line x1='14' y1='15' x2='14' y2='19' stroke='%2300fff5' stroke-width='2.5' stroke-linecap='round'/><line x1='14' y1='19' x2='17' y2='21' stroke='%2300fff5' stroke-width='2.5' stroke-linecap='round'/><line x1='26' y1='8' x2='26' y2='14' stroke='%2300fff5' stroke-width='2.5' stroke-linecap='round'/><line x1='23' y1='11' x2='29' y2='11' stroke='%2300fff5' stroke-width='2.5' stroke-linecap='round'/></svg>`;
+
+const SHIELD_SVG = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230a0a2e' opacity='0.9'/><path d='M16 4 L26 8 L26 17 C26 22 21 26 16 28 C11 26 6 22 6 17 L6 8 Z' fill='none' stroke='%2300b4ff' stroke-width='2.2'/><path d='M16 9 L22 12 L22 18 C22 21 19 23 16 24.5 C13 23 10 21 10 18 L10 12 Z' fill='%2300b4ff' opacity='0.25'/></svg>`;
 
 // Asset paths (real SVG files from abstract-asteroids)
 const ASSETS = {
@@ -236,6 +238,7 @@ function keypressHandler(e) {
   if (e.key === 's' || e.key === 'ArrowDown')  { controls.down  = v; e.preventDefault(); }
   if (e.key === 'd' || e.key === 'ArrowRight') { controls.right = v; e.preventDefault(); }
   if ((e.key === 'm' || e.key === 'M') && v)   { toggleMute(); }
+  if ((e.key === 'p' || e.key === 'P' || e.key === 'Escape') && v) { togglePause(); }
   if (e.key === ' ') {
     e.preventDefault();
     if (v && !controls.spaceHeld) {
@@ -290,24 +293,36 @@ function moveShip(dt) {
 // ── Asteroids ─────────────────────────────────────────
 const asteroids = [];
 
-function spawnAsteroid() {
-  const src = Math.random() < 0.5 ? ASSETS.asteroid1 : ASSETS.asteroid2;
-  const lvl = getLevelConfig(currentLevel);
-  const obj = {
-    x: Math.random() * W, y: -30,
-    w: 50, h: 50,
-    s:  Math.random() * (lvl.speedMax - lvl.speedMin) + lvl.speedMin,
-    vx: (Math.random() * 2 - 1) * lvl.vxMax,
+function spawnAsteroid(opts = {}) {
+  const src  = Math.random() < 0.5 ? ASSETS.asteroid1 : ASSETS.asteroid2;
+  const lvl  = getLevelConfig(currentLevel);
+  const size = opts.size || 'large';
+  const dim  = size === 'large' ? 50 : 28;
+  const obj  = {
+    x:    opts.x  !== undefined ? opts.x  : Math.random() * W,
+    y:    opts.y  !== undefined ? opts.y  : -30,
+    w: dim, h: dim, size,
+    s:    opts.s  !== undefined ? opts.s  : Math.random() * (lvl.speedMax - lvl.speedMin) + lvl.speedMin,
+    vx:   opts.vx !== undefined ? opts.vx : (Math.random() * 2 - 1) * lvl.vxMax,
   };
   obj.marker = L.marker(px(obj.x, obj.y), {
     icon: L.divIcon({
       className: '',
-      html: `<img src="${src}" width="50" height="50" class="asteroid-spin" style="display:block;filter:drop-shadow(0 0 6px rgba(255,80,80,0.5))">`,
-      iconSize: [50, 50], iconAnchor: [25, 25],
+      html: `<img src="${src}" width="${dim}" height="${dim}" class="asteroid-spin" style="display:block;filter:drop-shadow(0 0 6px rgba(255,80,80,0.5))">`,
+      iconSize: [dim, dim], iconAnchor: [dim/2, dim/2],
     }),
     interactive: false,
   }).addTo(map);
   asteroids.push(obj);
+}
+
+function splitAsteroid(a) {
+  explodeAt(a.x, a.y);
+  const speed = a.s * 1.4;
+  for (let i = 0; i < 2; i++) {
+    const angle = (i === 0 ? -1 : 1) * (Math.PI / 5 + Math.random() * Math.PI / 5);
+    spawnAsteroid({ size: 'small', x: a.x, y: a.y, s: speed, vx: Math.sin(angle) * speed * 0.6 });
+  }
 }
 
 function moveAsteroids(dt) {
@@ -339,6 +354,12 @@ function spawnTimeBoost() {
   if (gameOver) return;
   _spawnPowerup('time',   TIMEBOOST_SVG, 'timeboost-pulse',
     'rgba(0,255,245,0.9)', 'rgba(0,255,245,0.5)', 70);
+}
+
+function spawnShield() {
+  if (gameOver) return;
+  _spawnPowerup('shield', SHIELD_SVG, 'shield-pulse',
+    'rgba(0,180,255,0.9)', 'rgba(0,180,255,0.4)', 60);
 }
 
 function _spawnPowerup(type, svg, cls, c1, c2, speed) {
@@ -482,9 +503,12 @@ function showTimePulse() {
 
 // ── Game loop ─────────────────────────────────────────
 let points = 0, gameOver = false, lastTime = 0;
+let paused = false, pauseUsed = false;
+let shipShielded = false, shieldTimer = 0;
+let personalBest = parseInt(localStorage.getItem('bombay_asteroids_best') || '0');
 
 function tick(ts) {
-  if (gameOver) return;
+  if (gameOver || paused) return;
   requestAnimationFrame(tick);
 
   if (lastTime === 0) { lastTime = ts; return; }
@@ -493,6 +517,12 @@ function tick(ts) {
 
   levelTimer -= dt;
   if (levelTimer <= 0) { endGame("TIME'S UP"); return; }
+
+  // Shield countdown
+  if (shipShielded) {
+    shieldTimer -= dt;
+    if (shieldTimer <= 0) { shipShielded = false; updateShieldGlow(false); }
+  }
 
   // ── Lock state machine ────────────────────────────
   if (lockState === 'warning') {
@@ -532,6 +562,11 @@ function tick(ts) {
         levelTimer = Math.min(levelTimer + 12, getLevelConfig(currentLevel).timeLimit + 12);
         showTimePulse();
         playTimePickup();
+      } else if (p.type === 'shield') {
+        shipShielded = true;
+        shieldTimer  = 5;
+        updateShieldGlow(true);
+        playHealthPickup();
       }
       map.removeLayer(p.marker);
       powerups.splice(i, 1);
@@ -543,9 +578,11 @@ function tick(ts) {
   for (const a of asteroids) {
     if (isColliding(a, ship)) {
       a.s *= 0.95;
-      ship.hl -= 20 * dt;
-      playExplosion();  // Collision alert
-      if (ship.hl <= 0) { endGame("HULL BREACH"); return; }
+      if (!shipShielded) {
+        ship.hl -= 20 * dt;
+        playExplosion();
+        if (ship.hl <= 0) { endGame("HULL BREACH"); return; }
+      }
     }
   }
 
@@ -554,9 +591,17 @@ function tick(ts) {
     const shot = shots[i];
     for (const a of asteroids) {
       if (isColliding(shot, a)) {
-        points += 10;
-        explodeAt(a.x, a.y);
-        resetAsteroid(a);
+        if (a.size === 'large') {
+          points += 10;
+          splitAsteroid(a);
+          map.removeLayer(a.marker);
+          asteroids.splice(asteroids.indexOf(a), 1);
+        } else {
+          points += 15;
+          explodeAt(a.x, a.y);
+          map.removeLayer(a.marker);
+          asteroids.splice(asteroids.indexOf(a), 1);
+        }
         removeShot(shot);
         break;
       }
@@ -606,9 +651,90 @@ function displayLeaderboard(scores) {
   `).join('') || '<p style="color: #aaa; padding: 20px;">Loading leaderboard...</p>';
 }
 
+// ── Shield glow on ship ───────────────────────────────
+function updateShieldGlow(on) {
+  if (!shipMarker) return;
+  const img = shipMarker.getElement()?.querySelector('img');
+  if (img) img.style.filter = on
+    ? 'drop-shadow(0 0 10px #00b4ff) drop-shadow(0 0 24px #00b4ff)'
+    : '';
+}
+
+// ── Pause (one use per game) ──────────────────────────
+function togglePause() {
+  if (gameOver) return;
+  if (!paused) {
+    if (pauseUsed) return;
+    paused    = true;
+    pauseUsed = true;
+    document.getElementById('pause-overlay').style.display = 'flex';
+    document.getElementById('pause-btn').textContent = '▶';
+    document.getElementById('pause-btn').title = 'Resume';
+  } else {
+    paused    = false;
+    lastTime  = 0;
+    document.getElementById('pause-overlay').style.display = 'none';
+    document.getElementById('pause-btn').textContent = '⏸';
+    document.getElementById('pause-btn').disabled = true;
+    document.getElementById('pause-btn').classList.add('used');
+    requestAnimationFrame(tick);
+  }
+}
+
+// ── Share score ───────────────────────────────────────
+function shareScore(platform) {
+  const txt = `🚀 I scored ${points} pts at Level ${currentLevel} in Bombay Asteroids!\nCan you beat me? Play here: https://somdeepkundu.github.io/bombay-asteroids/`;
+  if (platform === 'whatsapp') {
+    window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`, '_blank');
+  } else if (platform === 'share') {
+    if (navigator.share) {
+      navigator.share({ title: 'Bombay Asteroids', text: txt, url: 'https://somdeepkundu.github.io/bombay-asteroids/' });
+    } else {
+      navigator.clipboard.writeText(txt).then(() => alert('Score copied! Paste it on Instagram 📸'));
+    }
+  }
+}
+
+// ── Level transition screen ───────────────────────────
+const LEVEL_HINTS = {
+  2: '☄️ Asteroids getting faster...',
+  3: '↙️ They drift sideways now',
+  4: '🔒 Roll locks activated!',
+  5: '💨 Speed ramping up',
+  6: '🌀 Chaos mode approaching',
+  7: '⚡ No mercy from here',
+};
+
+function showLevelBanner(label) {
+  const existing = document.getElementById('level-transition');
+  if (existing) existing.remove();
+
+  const hint = LEVEL_HINTS[currentLevel] || '🛸 Stay focused, pilot';
+  const el = document.createElement('div');
+  el.id = 'level-transition';
+  el.innerHTML = `
+    <div class="lt-inner">
+      <div class="lt-tag">LEVEL UP</div>
+      <div class="lt-name">${label}</div>
+      <div class="lt-hint">${hint}</div>
+    </div>`;
+  document.body.appendChild(el);
+  setTimeout(() => {
+    el.classList.add('lt-fade');
+    setTimeout(() => el.remove(), 500);
+  }, 2200);
+}
+
 // ── Game over ─────────────────────────────────────────
 function endGame(reason) {
   gameOver = true;
+
+  // Personal best
+  const isNewBest = points > personalBest;
+  if (isNewBest) {
+    personalBest = points;
+    localStorage.setItem('bombay_asteroids_best', points);
+  }
 
   // Save score to leaderboard
   saveToLeaderboard(playerName, points);
@@ -617,11 +743,16 @@ function endGame(reason) {
   div.id = 'gameover';
   div.innerHTML = `
     <div class="gameover-title">${reason || 'GAME OVER'}</div>
+    ${isNewBest ? `<div class="personal-best-badge">🏅 NEW PERSONAL BEST!</div>` : `<div class="personal-best-info">Personal best: ${personalBest} pts</div>`}
     <div class="gameover-player">${playerName} &mdash; ${points} pts</div>
     <div class="gameover-level">Reached ${getLevelConfig(currentLevel).label}</div>
-    <div style="margin-top: 16px; padding: 12px; border-top: 1px solid rgba(255,255,255,0.2);">
+    <div class="share-row">
+      <button class="share-btn whatsapp" onclick="shareScore('whatsapp')">📲 WhatsApp</button>
+      <button class="share-btn insta"    onclick="shareScore('share')">📸 Instagram</button>
+    </div>
+    <div style="margin-top: 12px; padding: 12px; border-top: 1px solid rgba(255,255,255,0.2);">
       <div style="font-size: 12px; color: var(--neon-cyan); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;">🏆 Top 10 Global</div>
-      <div id="leaderboard-list" style="max-height: 180px; overflow-y: auto; font-size: 12px;"></div>
+      <div id="leaderboard-list" style="max-height: 180px; overflow-y: auto; font-size: 12px;"><div style="color:#445;font-size:11px;padding:8px 0">Loading scores...</div></div>
     </div>
     <div class="gameover-credit">Developed by Somdeep Kundu &middot; @RuDRA Lab, C-TARA, IITB</div>
     <div class="gameover-source">learned from &ldquo;Problem Solving with Abstraction&rdquo; by Programming 2.0 (YouTube)</div>
@@ -629,7 +760,6 @@ function endGame(reason) {
   `;
   document.body.appendChild(div);
 
-  // Load leaderboard immediately
   loadLeaderboard();
 }
 
@@ -814,6 +944,7 @@ function launchGame() {
     for (let i = 0; i < getLevelConfig(0).count; i++) spawnAsteroid();
     setInterval(spawnHealth,    15000);   // health drop every 15 s
     setInterval(spawnTimeBoost, 22000);   // time boost every 22 s
+    setInterval(spawnShield,    35000);   // shield drop every 35 s
     requestAnimationFrame(tick);
   });
 }

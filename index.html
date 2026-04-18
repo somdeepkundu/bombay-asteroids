@@ -18,6 +18,11 @@
   <meta name="twitter:image" content="https://somdeepkundu.github.io/bombay-asteroids/assets/graphics/spaceship_full.svg">
   <meta name="description" content="A high-octane arcade shooter with infinite procedural difficulty, built with vanilla HTML/CSS/JS. Pilot your spaceship above Mumbai.">
   <link rel="icon" type="image/svg+xml" href="assets/graphics/spaceship_full.svg">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#000010">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="style.css">
 </head>
@@ -31,7 +36,17 @@
     <div id="score"><span id="number">000</span> pts</div>
     <div id="level-indicator">LEVEL 1</div>
     <div id="timer"><span id="timer-number">52</span>s</div>
-    <button id="mute-btn" onclick="toggleMute()" title="Toggle sound (M key)">🔊</button>
+    <button id="mute-btn"  onclick="toggleMute()"   title="Toggle sound (M key)">🔊</button>
+    <button id="pause-btn" onclick="togglePause()"  title="Pause game (P key)">⏸</button>
+  </div>
+
+  <!-- Pause overlay -->
+  <div id="pause-overlay">
+    <div class="pause-box">
+      <div class="pause-title">PAUSED</div>
+      <div class="pause-sub">Tap anywhere or press P to resume</div>
+      <button class="pause-resume-btn" onclick="togglePause()">▶ RESUME</button>
+    </div>
   </div>
 
   <div id="instructions">WASD / Arrow Keys &middot; SPACE to shoot</div>
@@ -84,5 +99,10 @@
   </div>
 
   <script src="script.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
 </body>
 </html>
