@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.2.4";
+const VERSION = "v2.2.5";
 
 // ── Leaderboard API ──────────────────────────────────
 const LEADERBOARD_API = 'https://bombay-asteroids-1028845604936.europe-west1.run.app'; // Google Cloud Run
@@ -626,7 +626,7 @@ async function saveToLeaderboard(name, score) {
     const response = await fetch(`${LEADERBOARD_API}/api/score`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, score, version: VERSION })
+      body: JSON.stringify({ name, score, version: VERSION, level: currentLevel + 1 })
     });
     if (response.ok) {
       console.log('✅ Score saved to leaderboard!');

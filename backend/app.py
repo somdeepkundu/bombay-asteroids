@@ -57,12 +57,14 @@ def submit_score():
         score = int(score)
 
         version = data.get('version', '?')
+        level   = int(data.get('level', 0))
         now     = datetime.now(IST)
 
         db.collection(COLLECTION).add({
             'name':      name,
             'score':     score,
             'version':   version,
+            'level':     level,
             'date':      now.strftime('%d/%m'),
             'time':      now.strftime('%H:%M IST'),
             'timestamp': now.strftime('%Y-%m-%d %H:%M IST')
@@ -114,6 +116,7 @@ def admin_scores():
                 "rank":      i + 1,
                 "name":      clean_name(s.get('name', '')),
                 "score":     s.get('score'),
+                "level":     s.get('level', 0),
                 "date":      s.get('date', ''),
                 "time":      s.get('time', ''),
                 "version":   s.get('version', ''),
