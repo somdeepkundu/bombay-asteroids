@@ -58,23 +58,23 @@ def submit_score():
 @app.route('/api/leaderboard', methods=['GET'])
 def get_leaderboard():
     try:
-        docs = (
-            db.collection(COLLECTION)
-              .order_by('score', direction=firestore.Query.DESCENDING)
-              .limit(10)
-              .stream()
-        )
+        docs   = db.collection(COLLECTION).stream()
+        scores = sorted(
+            [d.to_dict() for d in docs],
+            key=lambda x: x.get('score', 0),
+            reverse=True
+        )[:10]
         leaderboard = [
             {
                 "rank":      i + 1,
-                "name":      d.get('name'),
-                "score":     d.get('score'),
-                "date":      d.get('date', ''),
-                "time":      d.get('time', ''),
-                "version":   d.get('version', ''),
-                "timestamp": d.get('timestamp')
+                "name":      s.get('name'),
+                "score":     s.get('score'),
+                "date":      s.get('date', ''),
+                "time":      s.get('time', ''),
+                "version":   s.get('version', ''),
+                "timestamp": s.get('timestamp')
             }
-            for i, d in enumerate(docs)
+            for i, s in enumerate(scores)
         ]
         return jsonify(leaderboard), 200
 
@@ -88,24 +88,21 @@ def admin_scores():
     if key != ADMIN_KEY:
         return jsonify({"error": "Unauthorized"}), 401
     try:
-        docs = (
-            db.collection(COLLECTION)
-              .order_by('score', direction=firestore.Query.DESCENDING)
-              .stream()
-        )
-        scores = [
+        docs = db.collection(COLLECTION).stream()
+        scores = sorted([d.to_dict() for d in docs], key=lambda x: x.get('score', 0), reverse=True)
+        result = [
             {
                 "rank":      i + 1,
-                "name":      d.get('name'),
-                "score":     d.get('score'),
-                "date":      d.get('date', ''),
-                "time":      d.get('time', ''),
-                "version":   d.get('version', ''),
-                "timestamp": d.get('timestamp')
+                "name":      s.get('name'),
+                "score":     s.get('score'),
+                "date":      s.get('date', ''),
+                "time":      s.get('time', ''),
+                "version":   s.get('version', ''),
+                "timestamp": s.get('timestamp')
             }
-            for i, d in enumerate(docs)
+            for i, s in enumerate(scores)
         ]
-        return jsonify({"total": len(scores), "scores": scores}), 200
+        return jsonify({"total": len(result), "scores": result}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
