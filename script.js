@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.2.5";
+const VERSION = "v2.2.6";
 
 // ── Leaderboard API ──────────────────────────────────
 const LEADERBOARD_API = 'https://bombay-asteroids-1028845604936.europe-west1.run.app'; // Google Cloud Run
@@ -664,8 +664,11 @@ function displayLeaderboard(scores) {
 function updateShieldGlow(on) {
   if (!shipMarker) return;
   const img = shipMarker.getElement()?.querySelector('img');
+  // Keep to 2 drop-shadow layers (same as default ship glow) to avoid
+  // per-frame GPU re-composite lag. Wider radius + full opacity = strong
+  // visual without the extra compositing passes.
   if (img) img.style.filter = on
-    ? 'drop-shadow(0 0 4px #fff) drop-shadow(0 0 14px #00b4ff) drop-shadow(0 0 32px #00b4ff) drop-shadow(0 0 56px rgba(0,180,255,0.75)) brightness(1.25)'
+    ? 'drop-shadow(0 0 18px #00b4ff) drop-shadow(0 0 42px rgba(0,180,255,0.95))'
     : 'drop-shadow(0 0 10px rgba(0,255,245,0.8)) drop-shadow(0 0 22px rgba(0,255,245,0.4))';
 }
 
