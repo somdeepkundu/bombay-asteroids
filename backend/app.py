@@ -37,10 +37,16 @@ def submit_score():
         name  = name[:30]
         score = int(score)
 
+        version = data.get('version', '?')
+        now     = datetime.utcnow()
+
         db.collection(COLLECTION).add({
             'name':      name,
             'score':     score,
-            'timestamp': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+            'version':   version,
+            'date':      now.strftime('%d/%m'),
+            'time':      now.strftime('%H:%M'),
+            'timestamp': now.strftime('%Y-%m-%d %H:%M:%S')
         })
 
         return jsonify({"message": "Score saved!", "name": name, "score": score}), 201
@@ -59,7 +65,15 @@ def get_leaderboard():
               .stream()
         )
         leaderboard = [
-            {"rank": i + 1, "name": d.get('name'), "score": d.get('score'), "timestamp": d.get('timestamp')}
+            {
+                "rank":      i + 1,
+                "name":      d.get('name'),
+                "score":     d.get('score'),
+                "date":      d.get('date', ''),
+                "time":      d.get('time', ''),
+                "version":   d.get('version', ''),
+                "timestamp": d.get('timestamp')
+            }
             for i, d in enumerate(docs)
         ]
         return jsonify(leaderboard), 200
@@ -80,7 +94,15 @@ def admin_scores():
               .stream()
         )
         scores = [
-            {"rank": i + 1, "name": d.get('name'), "score": d.get('score'), "timestamp": d.get('timestamp')}
+            {
+                "rank":      i + 1,
+                "name":      d.get('name'),
+                "score":     d.get('score'),
+                "date":      d.get('date', ''),
+                "time":      d.get('time', ''),
+                "version":   d.get('version', ''),
+                "timestamp": d.get('timestamp')
+            }
             for i, d in enumerate(docs)
         ]
         return jsonify({"total": len(scores), "scores": scores}), 200
