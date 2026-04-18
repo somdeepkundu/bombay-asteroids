@@ -13,8 +13,9 @@ A browser-based shoot'em'up game built with **vanilla HTML, CSS, and JavaScript*
   <img src="https://img.shields.io/badge/Cloud_Run-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white" />
 </p>
 
-**Live:** [somdeepkundu.github.io/bombay-asteroids](https://somdeepkundu.github.io/bombay-asteroids/)  
-# **GitHub Pages:** [somdeepkundu.github.io/bombay-asteroids](https://somdeepkundu.github.io/bombay-asteroids/)
+
+## **Live:** [https://bombay-asteroids.streamlit.app/](https://bombay-asteroids.streamlit.app/)  
+
 
 
 ---
