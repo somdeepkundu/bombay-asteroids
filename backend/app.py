@@ -7,7 +7,9 @@ Uses Google Cloud Firestore for persistent storage
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from google.cloud import firestore
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+
+IST = timezone(timedelta(hours=5, minutes=30))
 
 app = Flask(__name__)
 CORS(app)
@@ -38,15 +40,15 @@ def submit_score():
         score = int(score)
 
         version = data.get('version', '?')
-        now     = datetime.utcnow()
+        now     = datetime.now(IST)
 
         db.collection(COLLECTION).add({
             'name':      name,
             'score':     score,
             'version':   version,
             'date':      now.strftime('%d/%m'),
-            'time':      now.strftime('%H:%M'),
-            'timestamp': now.strftime('%Y-%m-%d %H:%M:%S')
+            'time':      now.strftime('%H:%M IST'),
+            'timestamp': now.strftime('%Y-%m-%d %H:%M IST')
         })
 
         return jsonify({"message": "Score saved!", "name": name, "score": score}), 201
