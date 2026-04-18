@@ -14,7 +14,8 @@ A browser-based shoot'em'up built with **vanilla HTML, CSS, and JavaScript** —
 </p>
 
 <p align="center">
-  <strong>🎮 Play now → <a href="https://somdeepkundu.github.io/bombay-asteroids/">somdeepkundu.github.io/bombay-asteroids</a></strong>
+  <strong>🎮 Play now → <a href="https://somdeepkundu.github.io/bombay-asteroids/">somdeepkundu.github.io/bombay-asteroids</a></strong><br/>
+  <strong>🌐 Also live on → <a href="https://bombay-asteroids.streamlit.app/">bombay-asteroids.streamlit.app</a></strong>
 </p>
 
 ---
