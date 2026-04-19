@@ -494,6 +494,11 @@ function levelUp(newIdx) {
   showLevelBanner(lvl.label);
   playLevelUp();
   if (lvl.hasLock) scheduleLock();
+  // Gently re-centre on the next Mumbai waypoint — no zoom change, low cost
+  if (map) {
+    const wp = waypointFor(newIdx);
+    map.panTo([wp.lat, wp.lng], { animate: true, duration: 6, easeLinearity: 0.1 });
+  }
 }
 
 function showLevelBanner(label) {
@@ -507,34 +512,29 @@ function showLevelBanner(label) {
   }, 1600);
 }
 
-// ── Map drift — steers slowly toward current level's waypoint ──
-let _driftThrottle = 0;
-function driftMap(dt) {
-  if (!map) return;
-
-  // Steer toward the waypoint for the current level
-  const wp = waypointFor(currentLevel);
-  const pt = map.latLngToContainerPoint([wp.lat, wp.lng]);
-  const dx = pt.x - W / 2;
-  const dy = pt.y - H / 2;
-  if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
-    const target = Math.atan2(dy, dx);
-    let delta = target - driftAngle;
-    while (delta >  Math.PI) delta -= Math.PI * 2;
-    while (delta < -Math.PI) delta += Math.PI * 2;
-    driftAngle += delta * Math.min(1, dt * 0.3);
-  }
-
-  // Throttle panBy to 4 fps — Leaflet is expensive on low-end phones
-  _driftThrottle += dt;
-  if (_driftThrottle < 0.25) return;
-  _driftThrottle = 0;
-
-  const dist = 3;   // pixels per tick — very slow
-  map.panBy(
-    [Math.cos(driftAngle) * dist, Math.sin(driftAngle) * dist],
-    { animate: false, noMoveStart: true }
-  );
+// ── Map drift — runs on its OWN 1-second interval, never inside the game loop ──
+// This means the map can never lag the game, even on the slowest phones.
+function _startMapDrift() {
+  setInterval(() => {
+    if (!map || gameOver || paused) return;
+    // Steer toward the current level's Mumbai waypoint
+    const wp = waypointFor(currentLevel);
+    const pt = map.latLngToContainerPoint([wp.lat, wp.lng]);
+    const dx = pt.x - W / 2;
+    const dy = pt.y - H / 2;
+    if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+      const target = Math.atan2(dy, dx);
+      let delta = target - driftAngle;
+      while (delta >  Math.PI) delta -= Math.PI * 2;
+      while (delta < -Math.PI) delta += Math.PI * 2;
+      driftAngle += delta * 0.25;   // gentle turn per second
+    }
+    // 3 px/s — barely perceptible, very smooth
+    map.panBy(
+      [Math.cos(driftAngle) * 3, Math.sin(driftAngle) * 3],
+      { animate: false, noMoveStart: true }
+    );
+  }, 1000);   // once per second
 }
 
 // ── Time-pickup flash on the timer display ───────────
@@ -667,7 +667,6 @@ function tick(ts) {
   moveAsteroids(dt);
   moveShots(dt);
   movePowerups(dt);
-  driftMap(dt);
 
   const newLevel = getLevelIndex(points);
   if (newLevel > currentLevel) levelUp(newLevel);
@@ -1016,6 +1015,7 @@ function launchGame() {
     setInterval(spawnHealth,    15000);   // health drop every 15 s
     setInterval(spawnTimeBoost, 22000);   // time boost every 22 s
     setInterval(spawnShield,    35000);   // shield drop every 35 s
+    _startMapDrift();                     // map wanders at 1 fps, off the game loop
     requestAnimationFrame(tick);
   });
 }
