@@ -3,7 +3,7 @@
 //  Fully self-contained build: graphics and logic.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.2.9.3";
+const VERSION = "v2.2.9.4";
 
 // ── Mumbai waypoints — each level lands on a different neighbourhood ──
 const MUMBAI_WAYPOINTS = [
@@ -454,8 +454,55 @@ function launchGame() {
   });
 }
 
+// ── Mobile joystick & fire button ──
+function setupTouchControls() {
+  const joystickZone = document.getElementById('joystick-zone');
+  const joystickThumb = document.getElementById('joystick-thumb');
+  const fireBtn = document.getElementById('fire-btn');
+  if (!joystickZone || !joystickThumb || !fireBtn) return;
+
+  let joystickActive = false;
+  joystickZone.addEventListener('touchstart', (e) => {
+    joystickActive = true;
+    updateJoystick(e);
+  });
+  joystickZone.addEventListener('touchmove', (e) => {
+    if (!joystickActive) return;
+    e.preventDefault();
+    updateJoystick(e);
+  });
+  joystickZone.addEventListener('touchend', () => {
+    joystickActive = false;
+    joystickThumb.style.transform = 'translate(0, 0)';
+    controls.jx = 0;
+    controls.jy = 0;
+  });
+
+  function updateJoystick(e) {
+    const touch = e.touches[0];
+    const rect = joystickZone.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = touch.clientX - cx;
+    const dy = touch.clientY - cy;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const maxDist = Math.min(rect.width, rect.height) / 2 - 15;
+    const ratio = Math.min(dist / maxDist, 1);
+    const angle = Math.atan2(dy, dx);
+    const thumbX = Math.cos(angle) * ratio * maxDist;
+    const thumbY = Math.sin(angle) * ratio * maxDist;
+    joystickThumb.style.transform = `translate(${thumbX}px, ${thumbY}px)`;
+    controls.jx = Math.cos(angle) * ratio;
+    controls.jy = Math.sin(angle) * ratio;
+  }
+
+  fireBtn.addEventListener('touchstart', () => { if (!controls.spaceHeld) { fireShot(); controls.spaceHeld = true; autoFireTimer = AUTO_FIRE_INTERVAL; } });
+  fireBtn.addEventListener('touchend', () => { controls.spaceHeld = false; autoFireTimer = 0; });
+}
+
 window.addEventListener('load', () => {
   document.getElementById('start-btn').addEventListener('click', startGame);
   const saved = localStorage.getItem('bombay_asteroids_player_name');
   if (saved) document.getElementById('player-name').value = saved;
+  setupTouchControls();
 });
