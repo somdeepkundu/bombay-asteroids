@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.3.4";
+const VERSION = "v2.3.5";
 
 // ── Mumbai waypoints — each level lands on a different neighbourhood ──
 const MUMBAI_WAYPOINTS = [
@@ -568,7 +568,7 @@ function showLevelBanner(label) {
 function _startMapDrift() {
   setInterval(() => {
     if (!map || gameOver || paused) return;
-    map.panBy([0, 10], { animate: true, duration: 1, noMoveStart: true });
+    map.panBy([0, 25], { animate: true, duration: 1, noMoveStart: true });
   }, 1000);
 }
 
