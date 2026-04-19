@@ -57,14 +57,40 @@ function initMusic() {
     console.log('❌ Audio element not found');
     return;
   }
-  console.log('✓ Audio element found, state:', bgMusic.readyState, 'networkState:', bgMusic.networkState);
+
+  console.log('✓ Audio element found, readyState:', bgMusic.readyState, 'networkState:', bgMusic.networkState);
+
   bgMusic.volume = 0.35;
   bgMusic.muted = false;
-  const playPromise = bgMusic.play();
-  if (playPromise !== undefined) {
-    playPromise
-      .then(() => console.log('✓ Tabla music playing'))
-      .catch(err => console.log('❌ Music blocked:', err.name, err.message));
+  bgMusic.currentTime = 0;
+
+  // Ensure the audio element starts loading
+  bgMusic.load();
+
+  // Check loading status
+  const checkReady = setInterval(() => {
+    if (bgMusic.readyState >= 2) { // HAVE_CURRENT_DATA or better
+      clearInterval(checkReady);
+      console.log('✓ Audio loaded, readyState:', bgMusic.readyState);
+      attemptPlay();
+    }
+  }, 100);
+
+  function attemptPlay() {
+    const playPromise = bgMusic.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => console.log('✓ Tabla music playing'))
+        .catch(err => {
+          console.log('⚠️ Autoplay blocked (' + err.name + ') — will play on next user click');
+          // Unlock on next click
+          document.addEventListener('click', playOnClick, { once: true });
+        });
+    }
+  }
+
+  function playOnClick() {
+    bgMusic.play().catch(e => console.log('❌ Click-triggered play failed:', e.message));
   }
 }
 
