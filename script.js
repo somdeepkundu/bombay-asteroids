@@ -22,6 +22,46 @@ const MUMBAI_WAYPOINTS = [
 ];
 function waypointFor(level) { return MUMBAI_WAYPOINTS[level % MUMBAI_WAYPOINTS.length]; }
 
+// ── Map Tile Preloader ────────────────────────────────
+function preloadWaypointTiles() {
+  // Use 'a' subdomain for cache warming
+  const template = 'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png';
+  
+  // Standard slippy map tile math
+  function lon2tile(lon, zoom) { 
+    return Math.floor((lon + 180) / 360 * Math.pow(2, zoom)); 
+  }
+  function lat2tile(lat, zoom) { 
+    return Math.floor((1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zoom)); 
+  }
+
+  const tileUrls = new Set();
+  
+  // For every waypoint, calculate the Z/X/Y for zoom 13 and 15
+  MUMBAI_WAYPOINTS.forEach(wp => {
+    [13, 15].forEach(z => {
+      const cx = lon2tile(wp.lng, z);
+      const cy = lat2tile(wp.lat, z);
+      
+      // Preload a 3x3 grid around the center coordinate to cover the wide desktop viewport
+      for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+          tileUrls.add(template.replace('{z}', z).replace('{x}', cx + dx).replace('{y}', cy + dy));
+        }
+      }
+    });
+  });
+
+  // Silently trigger browser downloads
+  tileUrls.forEach(url => {
+    const img = new Image();
+    img.src = url;
+  });
+  
+  console.log(`🚀 Silently preloading ${tileUrls.size} map tiles for smooth flying...`);
+}
+
+
 // ── Leaderboard API ──────────────────────────────────
 const LEADERBOARD_API = 'https://bombay-asteroids-1028845604936.europe-west1.run.app'; // Google Cloud Run
 
