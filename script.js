@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.3.5";
+const VERSION = "v2.3.6";
 
 // ── Mumbai waypoints — each level lands on a different neighbourhood ──
 const MUMBAI_WAYPOINTS = [
@@ -636,6 +636,12 @@ function tickShipCollisions(dt) {
     a.x -= nx * 15;
     a.vx = -nx * (a.s * 0.6);
     a.s  *= 0.85;
+
+    // ── Map knockback (opposite direction of collision) ──
+    if (map) {
+      map.panBy([-nx * 10, -ny * 10], { animate: false, noMoveStart: true });
+    }
+
     if (!shipShielded) {
       ship.hl -= 20 * dt;
       playExplosion();
