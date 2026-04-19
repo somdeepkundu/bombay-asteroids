@@ -568,7 +568,7 @@ function showLevelBanner(label) {
 function _startMapDrift() {
   setInterval(() => {
     if (!map || gameOver || paused) return;
-    map.panBy([0, 4], { animate: false, noMoveStart: true });
+    map.panBy([0, 10], { animate: true, duration: 1, noMoveStart: true });
   }, 1000);
 }
 
