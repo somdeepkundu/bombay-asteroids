@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.3.1";
+const VERSION = "v2.3.2";
 
 // ── Mumbai waypoints — each level lands on a different neighbourhood ──
 const MUMBAI_WAYPOINTS = [
@@ -981,9 +981,10 @@ function startGame() {
     localStorage.setItem('bombay_asteroids_player_name', playerName);
   }
 
-  // Unlock AudioContext — must happen inside a user-gesture handler
+  // Unlock AudioContext + start music — must happen inside a user-gesture handler
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   if (audioCtx.state === 'suspended') audioCtx.resume();
+  initMusic();
 
   const screen = document.getElementById('startscreen');
   screen.style.opacity    = '0';
@@ -1015,7 +1016,6 @@ function launchGame() {
     setInterval(spawnTimeBoost, 22000);   // time boost every 22 s
     setInterval(spawnShield,    35000);   // shield drop every 35 s
     _startMapDrift();
-    initMusic();
     requestAnimationFrame(tick);
   });
 }
