@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.2.9";
+const VERSION = "v2.2.10";
 
 // ── Mumbai waypoints — each level lands on a different neighbourhood ──
 const MUMBAI_WAYPOINTS = [
@@ -513,40 +513,32 @@ function showLevelBanner(label) {
   }, 1600);
 }
 
-// ── Map parallax drift — wanders around Mumbai ────────
+// ── Map parallax drift — slow wander around Mumbai ────
+let _driftThrottle = 0;
 function driftMap(dt) {
   if (!map || flyingTo) return;
 
-  // Occasionally pick a new target direction so the camera roams, not just scrolls.
   driftChangeTimer -= dt;
   if (driftChangeTimer <= 0) {
     driftAngleTarget = Math.random() * Math.PI * 2;
-    driftChangeTimer = 7 + Math.random() * 5;   // re-target every 7–12s
+    driftChangeTimer = 9 + Math.random() * 6;   // re-target every 9–15s
   }
-  // Smoothly lerp current angle toward target (shortest way around the circle)
   let delta = driftAngleTarget - driftAngle;
   while (delta >  Math.PI) delta -= Math.PI * 2;
   while (delta < -Math.PI) delta += Math.PI * 2;
-  driftAngle += delta * Math.min(1, dt * 0.4);
+  driftAngle += delta * Math.min(1, dt * 0.25);
 
-  const speed = 18 + currentLevel * 4;
-  mapDriftAcc += speed * dt;
-  if (mapDriftAcc >= 1) {
-    const step = Math.floor(mapDriftAcc);
-    const dx   = Math.cos(driftAngle) * step;
-    const dy   = Math.sin(driftAngle) * step;
-    map.panBy([dx, dy], { animate: false, noMoveStart: true });
-    mapDriftAcc -= step;
-  }
-}
+  // Throttle panBy to ~5 fps so Leaflet isn't repainting 60×/s
+  _driftThrottle += dt;
+  if (_driftThrottle < 0.2) return;
+  const elapsed = _driftThrottle;
+  _driftThrottle = 0;
 
-// ── Ambient breathing — subtle scale pulse on the map ──
-function tickBreath(dt) {
-  const el = document.getElementById('map');
-  if (!el) return;
-  breathTime += dt;
-  const s = 1 + Math.sin(breathTime * 0.35) * 0.015;   // ±1.5%
-  el.style.transform = `scale(${s.toFixed(4)})`;
+  const speed = 5 + currentLevel * 1.2;          // much slower pixels/s
+  const dist  = speed * elapsed;
+  const dx    = Math.cos(driftAngle) * dist;
+  const dy    = Math.sin(driftAngle) * dist;
+  map.panBy([dx, dy], { animate: false, noMoveStart: true });
 }
 
 // ── Level-up: fly to next Mumbai waypoint with a zoom pulse ──
@@ -693,7 +685,6 @@ function tick(ts) {
   moveShots(dt);
   movePowerups(dt);
   driftMap(dt);
-  tickBreath(dt);
 
   const newLevel = getLevelIndex(points);
   if (newLevel > currentLevel) levelUp(newLevel);
