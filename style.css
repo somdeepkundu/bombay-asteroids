@@ -22,6 +22,8 @@ body {
 
 .leaflet-container:focus { outline: none; }
 
+#map {   transition: transform 0.1s linear;  }
+
 /* ── Sprite animations ────────────────────────────── */
 /* Applied directly to the <img> tags created in script.js */
 
@@ -1050,3 +1052,4 @@ body {
 .shock-anim { 
   animation: ship-shock 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; 
 }
+
