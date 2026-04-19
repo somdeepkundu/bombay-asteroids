@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.3.2";
+const VERSION = "v2.3.3";
 
 // ── Mumbai waypoints — each level lands on a different neighbourhood ──
 const MUMBAI_WAYPOINTS = [
@@ -52,10 +52,10 @@ let bgMusic    = null;
 let musicMuted = false;
 
 function initMusic() {
-  bgMusic = new Audio('assets/audio/game_table1.mp3');
-  bgMusic.loop   = true;
+  bgMusic = document.getElementById('bg-music');
+  if (!bgMusic) return;
   bgMusic.volume = 0.35;
-  bgMusic.play().catch(() => {});  // autoplay blocked silently
+  bgMusic.play().catch(err => console.log('Music blocked:', err.message));
 }
 
 function toggleMuteMusic() {
