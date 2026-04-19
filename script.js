@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.2.11";
+const VERSION = "v2.2.15";
 
 // ── Mumbai waypoints — each level lands on a different neighbourhood ──
 const MUMBAI_WAYPOINTS = [
@@ -508,29 +508,22 @@ function showLevelBanner(label) {
   }, 1600);
 }
 
-// ── Map drift — runs on its OWN 3-second interval, never inside the game loop ──
-// This means the map can never lag the game, even on the slowest phones.
+// ── Map drift — axis-aligned only (pure roll OR pitch each tick) ──
+// Avoids diagonal tile-loading jank. Fires every 1 second off the game loop.
 function _startMapDrift() {
   setInterval(() => {
     if (!map || gameOver || paused) return;
-    // Steer toward the current level's Mumbai waypoint
     const wp = waypointFor(currentLevel);
     const pt = map.latLngToContainerPoint([wp.lat, wp.lng]);
     const dx = pt.x - W / 2;
     const dy = pt.y - H / 2;
-    if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
-      const target = Math.atan2(dy, dx);
-      let delta = target - driftAngle;
-      while (delta >  Math.PI) delta -= Math.PI * 2;
-      while (delta < -Math.PI) delta += Math.PI * 2;
-      driftAngle += delta * 0.15;   // gentle turn per interval
+    // Move only on the dominant axis — pure horizontal OR vertical, never diagonal
+    if (Math.abs(dx) >= Math.abs(dy)) {
+      map.panBy([Math.sign(dx) * 4, 0], { animate: false, noMoveStart: true });
+    } else {
+      map.panBy([0, Math.sign(dy) * 4], { animate: false, noMoveStart: true });
     }
-    // 4 px/interval (≈1.3 px/s) — very subtle drift
-    map.panBy(
-      [Math.cos(driftAngle) * 4, Math.sin(driftAngle) * 4],
-      { animate: false, noMoveStart: true }
-    );
-  }, 3000);   // once per 3 seconds
+  }, 1000);
 }
 
 // ── Time-pickup flash on the timer display ───────────
