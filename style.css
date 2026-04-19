@@ -945,6 +945,30 @@ body {
   box-shadow: 0 0 12px rgba(255, 0, 110, 0.3);
 }
 
+#music-btn {
+  background: transparent;
+  border: 1px solid rgba(0, 255, 245, 0.3);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 16px;
+  padding: 6px 10px;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: all 0.2s;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+#music-btn:hover {
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+  box-shadow: 0 0 12px rgba(0, 255, 245, 0.4);
+}
+#music-btn.muted {
+  color: var(--neon-pink);
+  border-color: var(--neon-pink);
+  box-shadow: 0 0 12px rgba(255, 0, 110, 0.3);
+}
+
 /* ── Mobile responsive layout ───────────────────────– */
 @media (max-width: 768px) {
 

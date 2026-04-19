@@ -1,4 +1,4 @@
-const CACHE = 'bombay-asteroids-v2.2.16';
+const CACHE = 'bombay-asteroids-v2.3.1';
 const ASSETS = [
   '/bombay-asteroids/',
   '/bombay-asteroids/index.html',
@@ -10,6 +10,7 @@ const ASSETS = [
   '/bombay-asteroids/assets/graphics/asteroid2.svg',
   '/bombay-asteroids/assets/graphics/green_projectile.svg',
   '/bombay-asteroids/assets/graphics/explosion.svg',
+  '/bombay-asteroids/assets/audio/game_table1.mp3',
 ];
 
 self.addEventListener('install', e => {

@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.2.16";
+const VERSION = "v2.3.1";
 
 // ── Mumbai waypoints — each level lands on a different neighbourhood ──
 const MUMBAI_WAYPOINTS = [
@@ -47,6 +47,26 @@ const ASSETS = {
 let audioCtx   = null;
 let soundMuted = false;
 let _lastLaser = 0;
+
+let bgMusic    = null;
+let musicMuted = false;
+
+function initMusic() {
+  bgMusic = new Audio('assets/audio/game_table1.mp3');
+  bgMusic.loop   = true;
+  bgMusic.volume = 0.35;
+  bgMusic.play().catch(() => {});  // autoplay blocked silently
+}
+
+function toggleMuteMusic() {
+  musicMuted = !musicMuted;
+  if (bgMusic) bgMusic.muted = musicMuted;
+  const btn = document.getElementById('music-btn');
+  if (btn) {
+    btn.textContent = musicMuted ? '🔕' : '🥁';
+    btn.classList.toggle('muted', musicMuted);
+  }
+}
 
 function _ctx() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -994,7 +1014,8 @@ function launchGame() {
     setInterval(spawnHealth,    15000);   // health drop every 15 s
     setInterval(spawnTimeBoost, 22000);   // time boost every 22 s
     setInterval(spawnShield,    35000);   // shield drop every 35 s
-    _startMapDrift();                     // map wanders at 1 fps, off the game loop
+    _startMapDrift();
+    initMusic();
     requestAnimationFrame(tick);
   });
 }
