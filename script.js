@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.2.9";
+const VERSION = "v2.2.9.1";
 
 // ── Mumbai waypoints — each level lands on a different neighbourhood ──
 const MUMBAI_WAYPOINTS = [
@@ -554,12 +554,12 @@ function flyToWaypoint(level) {
   if (!map) return;
   const wp = waypointFor(level);
   flyingTo = true;
-  map.flyTo([wp.lat, wp.lng], 13, { duration: 1.2, easeLinearity: 0.25 });
+  map.flyTo([wp.lat, wp.lng], 13, { duration: 2.8, easeLinearity: 0.15 });
   setTimeout(() => {
     if (!map) return;
-    map.flyTo([wp.lat, wp.lng], 15, { duration: 1.1, easeLinearity: 0.25 });
-    setTimeout(() => { flyingTo = false; }, 1200);
-  }, 1300);
+    map.flyTo([wp.lat, wp.lng], 15, { duration: 2.6, easeLinearity: 0.15 });
+    setTimeout(() => { flyingTo = false; }, 2700);
+  }, 2900);
 }
 
 // ── Time-pickup flash on the timer display ───────────
