@@ -1,4 +1,4 @@
-const CACHE = 'bombay-asteroids-v2.2.10';
+const CACHE = 'bombay-asteroids-v2.2.11';
 const ASSETS = [
   '/bombay-asteroids/',
   '/bombay-asteroids/index.html',

@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.2.10";
+const VERSION = "v2.2.11";
 
 // ── Mumbai waypoints — each level lands on a different neighbourhood ──
 const MUMBAI_WAYPOINTS = [
@@ -163,12 +163,7 @@ function scoreToReachLevel(lvl) {
 
 let currentLevel = 0;
 let levelTimer   = 0;
-let mapDriftAcc  = 0;
-let driftAngle       = Math.PI / 2;        // current pan direction (radians); starts drifting "south"
-let driftAngleTarget = Math.PI / 2;        // target angle to lerp toward
-let driftChangeTimer = 0;                  // seconds until next wander re-target
-let breathTime       = 0;                  // accumulator for ambient breathing
-let flyingTo         = false;              // true while a flyToWaypoint animation runs
+let driftAngle   = Math.PI / 2;   // current heading (radians)
 let map, W, H;
 let playerName   = "Player";
 
@@ -499,7 +494,6 @@ function levelUp(newIdx) {
   showLevelBanner(lvl.label);
   playLevelUp();
   if (lvl.hasLock) scheduleLock();
-  flyToWaypoint(newIdx);
 }
 
 function showLevelBanner(label) {
@@ -513,45 +507,34 @@ function showLevelBanner(label) {
   }, 1600);
 }
 
-// ── Map parallax drift — slow wander around Mumbai ────
+// ── Map drift — steers slowly toward current level's waypoint ──
 let _driftThrottle = 0;
 function driftMap(dt) {
-  if (!map || flyingTo) return;
+  if (!map) return;
 
-  driftChangeTimer -= dt;
-  if (driftChangeTimer <= 0) {
-    driftAngleTarget = Math.random() * Math.PI * 2;
-    driftChangeTimer = 9 + Math.random() * 6;   // re-target every 9–15s
+  // Steer toward the waypoint for the current level
+  const wp = waypointFor(currentLevel);
+  const pt = map.latLngToContainerPoint([wp.lat, wp.lng]);
+  const dx = pt.x - W / 2;
+  const dy = pt.y - H / 2;
+  if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+    const target = Math.atan2(dy, dx);
+    let delta = target - driftAngle;
+    while (delta >  Math.PI) delta -= Math.PI * 2;
+    while (delta < -Math.PI) delta += Math.PI * 2;
+    driftAngle += delta * Math.min(1, dt * 0.3);
   }
-  let delta = driftAngleTarget - driftAngle;
-  while (delta >  Math.PI) delta -= Math.PI * 2;
-  while (delta < -Math.PI) delta += Math.PI * 2;
-  driftAngle += delta * Math.min(1, dt * 0.25);
 
-  // Throttle panBy to ~5 fps so Leaflet isn't repainting 60×/s
+  // Throttle panBy to 4 fps — Leaflet is expensive on low-end phones
   _driftThrottle += dt;
-  if (_driftThrottle < 0.2) return;
-  const elapsed = _driftThrottle;
+  if (_driftThrottle < 0.25) return;
   _driftThrottle = 0;
 
-  const speed = 5 + currentLevel * 1.2;          // much slower pixels/s
-  const dist  = speed * elapsed;
-  const dx    = Math.cos(driftAngle) * dist;
-  const dy    = Math.sin(driftAngle) * dist;
-  map.panBy([dx, dy], { animate: false, noMoveStart: true });
-}
-
-// ── Level-up: fly to next Mumbai waypoint with a zoom pulse ──
-function flyToWaypoint(level) {
-  if (!map) return;
-  const wp = waypointFor(level);
-  flyingTo = true;
-  map.flyTo([wp.lat, wp.lng], 13, { duration: 1.2, easeLinearity: 0.25 });
-  setTimeout(() => {
-    if (!map) return;
-    map.flyTo([wp.lat, wp.lng], 15, { duration: 1.1, easeLinearity: 0.25 });
-    setTimeout(() => { flyingTo = false; }, 1200);
-  }, 1300);
+  const dist = 3;   // pixels per tick — very slow
+  map.panBy(
+    [Math.cos(driftAngle) * dist, Math.sin(driftAngle) * dist],
+    { animate: false, noMoveStart: true }
+  );
 }
 
 // ── Time-pickup flash on the timer display ───────────
