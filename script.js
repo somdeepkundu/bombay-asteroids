@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.2.9.1";
+const VERSION = "v2.2.9.2";
 
 // ── Mumbai waypoints — each level lands on a different neighbourhood ──
 const MUMBAI_WAYPOINTS = [
@@ -163,7 +163,6 @@ function scoreToReachLevel(lvl) {
 
 let currentLevel = 0;
 let levelTimer   = 0;
-let mapDriftAcc  = 0;
 let driftAngle       = Math.PI / 2;        // current pan direction (radians); starts drifting "south"
 let driftAngleTarget = Math.PI / 2;        // target angle to lerp toward
 let driftChangeTimer = 0;                  // seconds until next wander re-target
@@ -306,11 +305,11 @@ function moveShip(dt) {
 
   // Digital (keyboard)
   if (canX) {
-    if (controls.left  && ship.x > ship.w / 2)     ship.x -= ship.s * dt;
+    if (controls.left  && ship.x > ship.w / 2)      ship.x -= ship.s * dt;
     if (controls.right && ship.x < W - ship.w / 2) ship.x += ship.s * dt;
   }
   if (canY) {
-    if (controls.up   && ship.y > ship.h / 2)      ship.y -= ship.s * dt;
+    if (controls.up   && ship.y > ship.h / 2)       ship.y -= ship.s * dt;
     if (controls.down && ship.y < H - ship.h / 2)  ship.y += ship.s * dt;
   }
 
@@ -503,14 +502,23 @@ function levelUp(newIdx) {
 }
 
 function showLevelBanner(label) {
+  const existing = document.getElementById('level-transition');
+  if (existing) existing.remove();
+
+  const hint = LEVEL_HINTS[currentLevel] || '🛸 Stay focused, pilot';
   const el = document.createElement('div');
-  el.className = 'level-banner';
-  el.textContent = label;
+  el.id = 'level-transition';
+  el.innerHTML = `
+    <div class="lt-inner">
+      <div class="lt-tag">LEVEL UP</div>
+      <div class="lt-name">${label}</div>
+      <div class="lt-hint">${hint}</div>
+    </div>`;
   document.body.appendChild(el);
   setTimeout(() => {
-    el.style.opacity = '0';
-    setTimeout(() => el.remove(), 600);
-  }, 1600);
+    el.classList.add('lt-fade');
+    setTimeout(() => el.remove(), 350);
+  }, 1400);
 }
 
 // ── Map parallax drift — wanders around Mumbai ────────
@@ -530,14 +538,12 @@ function driftMap(dt) {
   driftAngle += delta * Math.min(1, dt * 0.4);
 
   const speed = 18 + currentLevel * 4;
-  mapDriftAcc += speed * dt;
-  if (mapDriftAcc >= 1) {
-    const step = Math.floor(mapDriftAcc);
-    const dx   = Math.cos(driftAngle) * step;
-    const dy   = Math.sin(driftAngle) * step;
-    map.panBy([dx, dy], { animate: false, noMoveStart: true });
-    mapDriftAcc -= step;
-  }
+  const distance = speed * dt; // Exact distance to travel this frame
+  
+  const dx = Math.cos(driftAngle) * distance;
+  const dy = Math.sin(driftAngle) * distance;
+  
+  map.panBy([dx, dy], { animate: false, noMoveStart: true });
 }
 
 // ── Ambient breathing — subtle scale pulse on the map ──
@@ -554,12 +560,20 @@ function flyToWaypoint(level) {
   if (!map) return;
   const wp = waypointFor(level);
   flyingTo = true;
+  
+  // Step 1: Fly out to zoom 13
   map.flyTo([wp.lat, wp.lng], 13, { duration: 2.8, easeLinearity: 0.15 });
-  setTimeout(() => {
+  
+  // Step 2: Once zooming out is complete, fly back into zoom 15
+  map.once('moveend', () => {
     if (!map) return;
     map.flyTo([wp.lat, wp.lng], 15, { duration: 2.6, easeLinearity: 0.15 });
-    setTimeout(() => { flyingTo = false; }, 2700);
-  }, 2900);
+    
+    // Step 3: Release the flying lock once panning/zooming finishes
+    map.once('moveend', () => { 
+      flyingTo = false; 
+    });
+  });
 }
 
 // ── Time-pickup flash on the timer display ───────────
