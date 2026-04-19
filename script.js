@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.2.7";
+const VERSION = "v2.2.8";
 
 // ── Leaderboard API ──────────────────────────────────
 const LEADERBOARD_API = 'https://bombay-asteroids-1028845604936.europe-west1.run.app'; // Google Cloud Run
@@ -124,16 +124,20 @@ function playLevelUp() {
 }
 
 // ── Infinite procedural difficulty ───────────────────
+const _lvlCfgCache = new Map();
 function getLevelConfig(lvl) {
-  return {
+  if (_lvlCfgCache.has(lvl)) return _lvlCfgCache.get(lvl);
+  const cfg = {
     count:     Math.min(3 + lvl * 2, 16),
     speedMin:  50  + lvl * 15,
     speedMax:  Math.min(100 + lvl * 28, 280),
     vxMax:     Math.max(0, Math.min((lvl - 2) * 65, 200)),
     timeLimit: Math.max(10, 52 - lvl * 4),
     label:     'LEVEL ' + (lvl + 1),
-    hasLock:   lvl >= 3,   // roll/pitch lock active from Level 4 onwards
+    hasLock:   lvl >= 3,
   };
+  _lvlCfgCache.set(lvl, cfg);
+  return cfg;
 }
 
 function scoreToReachLevel(lvl) {
@@ -333,38 +337,6 @@ function moveAsteroids(dt) {
   }
 }
 
-// // --- NEW: Asteroid ↔ Asteroid collisions (Bouncing & Shattering) ---
-//   for (let i = 0; i < asteroids.length; i++) {
-//     for (let j = i + 1; j < asteroids.length; j++) {
-//       const a1 = asteroids[i];
-//       const a2 = asteroids[j];
-      
-//       if (isColliding(a1, a2)) {
-//         // 1. Separate them so they don't get stuck glued together
-//         const dx = a2.x - a1.x;
-//         const dy = a2.y - a1.y;
-//         const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-//         const overlap = (a1.w / 2 + a2.w / 2) - dist;
-
-//         a1.x -= (dx / dist) * (overlap / 2 + 1);
-//         a2.x += (dx / dist) * (overlap / 2 + 1);
-
-//         // 2. Exchange horizontal velocity (Elastic Bounce)
-//         const tempVx = a1.vx;
-//         a1.vx = a2.vx;
-//         a2.vx = tempVx;
-
-//         // 3. The "Sometime" factor: 10% chance they crush each other
-//         if (Math.random() < 1 && currentLevel >= 3) {
-//           explodeAt((a1.x + a2.x) / 2, (a1.y + a2.y) / 2);
-//           // Push them far offscreen so the reset logic grabs them naturally
-//           a1.y = H + 200; 
-//           a2.y = H + 200;
-//         }
-//       }
-//     }
-//   }
-
 function resetAsteroid(a) {
   a.y  = -30;
   a.x  = Math.random() * W;
@@ -539,6 +511,94 @@ let paused = false, pauseUsed = false;
 let shipShielded = false, shieldTimer = 0;
 let personalBest = parseInt(localStorage.getItem('bombay_asteroids_best') || '0');
 
+// ── Tick sub-steps (extracted from game loop) ────────
+function tickLockMachine(dt) {
+  if (lockState === 'warning') {
+    lockWarnTimer -= dt;
+    updateLockUI();
+    if (lockWarnTimer <= 0) { lockState = 'locked'; lockTimer = 6; updateLockUI(); }
+  } else if (lockState === 'locked') {
+    lockTimer -= dt;
+    updateLockUI();
+    if (lockTimer <= 0) { lockState = 'none'; lockAxis = null; updateLockUI(); scheduleLock(); }
+  }
+}
+
+function tickPowerupCollisions(dt) {
+  for (let i = powerups.length - 1; i >= 0; i--) {
+    const p = powerups[i];
+    if (!isColliding(p, ship)) continue;
+    if (p.type === 'health') {
+      ship.hl = Math.min(100, ship.hl + 40);
+      playHealthPickup();
+    } else if (p.type === 'time') {
+      levelTimer = Math.min(levelTimer + 12, getLevelConfig(currentLevel).timeLimit + 12);
+      showTimePulse();
+      playTimePickup();
+    } else if (p.type === 'shield') {
+      shipShielded = true;
+      shieldTimer  = 5;
+      updateShieldGlow(true);
+      playHealthPickup();
+    }
+    map.removeLayer(p.marker);
+    powerups.splice(i, 1);
+    break;
+  }
+}
+
+// Returns true if the game ended (hull breach), so tick() can early-return.
+function tickShipCollisions(dt) {
+  for (const a of asteroids) {
+    if (!isColliding(a, ship)) continue;
+    const dx   = ship.x - a.x;
+    const dy   = ship.y - a.y;
+    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+    const nx   = dx / dist;
+    const ny   = dy / dist;
+    ship.x = Math.max(ship.w / 2, Math.min(W - ship.w / 2, ship.x + nx * 18));
+    ship.y = Math.max(ship.h / 2, Math.min(H - ship.h / 2, ship.y + ny * 18));
+    a.x -= nx * 15;
+    a.vx = -nx * (a.s * 0.6);
+    a.s  *= 0.85;
+    if (!shipShielded) {
+      ship.hl -= 20 * dt;
+      playExplosion();
+      if (shipMarker) {
+        const img = shipMarker.getElement()?.querySelector('img');
+        if (img) {
+          img.classList.remove('shock-anim');
+          void img.offsetWidth;
+          img.classList.add('shock-anim');
+        }
+      }
+      if (ship.hl <= 0) { endGame("HULL BREACH"); return true; }
+    }
+  }
+  return false;
+}
+
+function tickShotCollisions() {
+  for (let i = shots.length - 1; i >= 0; i--) {
+    const shot = shots[i];
+    for (let j = asteroids.length - 1; j >= 0; j--) {
+      const a = asteroids[j];
+      if (!isColliding(shot, a)) continue;
+      if (a.size === 'large' && currentLevel >= 7) {
+        points += 10;
+        splitAsteroid(a);
+      } else {
+        points += a.size === 'large' ? 20 : 15;
+        explodeAt(a.x, a.y);
+      }
+      map.removeLayer(a.marker);
+      asteroids.splice(j, 1);
+      removeShot(shot);
+      break;
+    }
+  }
+}
+
 function tick(ts) {
   if (gameOver || paused) return;
   requestAnimationFrame(tick);
@@ -550,24 +610,14 @@ function tick(ts) {
   levelTimer -= dt;
   if (levelTimer <= 0) { endGame("TIME'S UP"); return; }
 
-  // Shield countdown
   if (shipShielded) {
     shieldTimer -= dt;
     if (shieldTimer <= 0) { shipShielded = false; updateShieldGlow(false); }
   }
 
-  // ── Lock state machine ────────────────────────────
-  if (lockState === 'warning') {
-    lockWarnTimer -= dt;
-    updateLockUI();
-    if (lockWarnTimer <= 0) { lockState = 'locked'; lockTimer = 6; updateLockUI(); }
-  } else if (lockState === 'locked') {
-    lockTimer -= dt;
-    updateLockUI();
-    if (lockTimer <= 0) { lockState = 'none'; lockAxis = null; updateLockUI(); scheduleLock(); }
-  }
+  tickLockMachine(dt);
 
-  // ── Continuous fire — Level 10+ ───────────────────
+  // Continuous fire — Level 10+
   if (currentLevel >= 9 && controls.spaceHeld) {
     autoFireTimer -= dt;
     if (autoFireTimer <= 0) { fireShot(); autoFireTimer = AUTO_FIRE_INTERVAL; }
@@ -579,151 +629,16 @@ function tick(ts) {
   movePowerups(dt);
   driftMap(dt);
 
-  // Level up check
   const newLevel = getLevelIndex(points);
   if (newLevel > currentLevel) levelUp(newLevel);
 
-  // Powerup ↔ ship
-  for (let i = powerups.length - 1; i >= 0; i--) {
-    const p = powerups[i];
-    if (isColliding(p, ship)) {
-      if (p.type === 'health') {
-        ship.hl = Math.min(100, ship.hl + 40);
-        playHealthPickup();
-      } else if (p.type === 'time') {
-        levelTimer = Math.min(levelTimer + 12, getLevelConfig(currentLevel).timeLimit + 12);
-        showTimePulse();
-        playTimePickup();
-      } else if (p.type === 'shield') {
-        shipShielded = true;
-        shieldTimer  = 5;
-        updateShieldGlow(true);
-        playHealthPickup();
-      }
-      map.removeLayer(p.marker);
-      powerups.splice(i, 1);
-      break;
-    }
-  }
+  tickPowerupCollisions(dt);
+  if (tickShipCollisions(dt)) return;
+  tickShotCollisions();
 
-  // Asteroid ↔ ship
-  // for (const a of asteroids) {
-  //   if (isColliding(a, ship)) {
-  //     a.s *= 0.95;
-  //     if (!shipShielded) {
-  //       ship.hl -= 20 * dt;
-  //       playExplosion();
-  //       if (ship.hl <= 0) { endGame("HULL BREACH"); return; }
-  //     }
-  //   }
-  // }
-
-  // v2
-  // // Asteroid ↔ ship
-  // for (const a of asteroids) {
-  //   if (isColliding(a, ship)) {
-  //     a.s *= 0.95;
-  //     if (!shipShielded) {
-  //       ship.hl -= 20 * dt;
-  //       playExplosion();
-
-  //       // --- NEW: Physics Knockback ---
-  //       const dx = ship.x - a.x;
-  //       const dy = ship.y - a.y;
-  //       const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-  //       ship.x += (dx / dist) * 18; // violently shove the ship 18px away
-  //       ship.y += (dy / dist) * 18;
-
-  //       // --- NEW: Visual Screen Shake ---
-  //       if (shipMarker) {
-  //         const img = shipMarker.getElement()?.querySelector('img');
-  //         if (img) {
-  //           img.classList.remove('shock-anim');
-  //           void img.offsetWidth; // trigger reflow to restart animation
-  //           img.classList.add('shock-anim');
-  //         }
-  //       }
-
-  //       if (ship.hl <= 0) { endGame("HULL BREACH"); return; }
-  //     }
-  //   }
-  // }
-
-  // v3 (final so far)
-  // Asteroid ↔ ship
-  for (const a of asteroids) {
-    if (isColliding(a, ship)) {
-      
-      // --- UPGRADED: Physics Knockback ---
-      const dx = ship.x - a.x;
-      const dy = ship.y - a.y;
-      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-      const nx = dx / dist; // Normalized vector X
-      const ny = dy / dist; // Normalized vector Y
-
-      // 1. Shove the ship away
-      ship.x += nx * 18;
-      ship.y += ny * 18;
-
-      // 2. CRITICAL: Clamp ship coordinates so it doesn't get pushed off-screen!
-      ship.x = Math.max(ship.w / 2, Math.min(W - ship.w / 2, ship.x));
-      ship.y = Math.max(ship.h / 2, Math.min(H - ship.h / 2, ship.y));
-
-      // 3. Bounce the asteroid away (Action & Reaction)
-      a.x -= nx * 15; 
-      a.vx = -nx * (a.s * 0.6); // Deflect its horizontal path
-      a.s *= 0.85;              // Slow it down slightly after impact
-
-      // --- Damage & Visuals ---
-      if (!shipShielded) {
-        ship.hl -= 20 * dt;
-        playExplosion();
-
-        // Visual Screen Shake
-        if (shipMarker) {
-          const img = shipMarker.getElement()?.querySelector('img');
-          if (img) {
-            img.classList.remove('shock-anim');
-            void img.offsetWidth; // trigger reflow to restart animation
-            img.classList.add('shock-anim');
-          }
-        }
-
-        if (ship.hl <= 0) { endGame("HULL BREACH"); return; }
-      }
-    }
-  }
-
-  // Shot ↔ asteroid
-  for (let i = shots.length - 1; i >= 0; i--) {
-    const shot = shots[i];
-    for (let j = asteroids.length - 1; j >= 0; j--) {
-      const a = asteroids[j];
-      if (isColliding(shot, a)) {
-        if (a.size === 'large' && currentLevel >= 7) {
-          // Split mechanic unlocks at Level 8 (index 7)
-          points += 10;
-          splitAsteroid(a);
-        } else {
-          // Normal destroy — large before L8 gives 20pts, small gives 15pts
-          points += a.size === 'large' ? 20 : 15;
-          explodeAt(a.x, a.y);
-        }
-        map.removeLayer(a.marker);
-        asteroids.splice(j, 1);
-        removeShot(shot);
-        break;
-      }
-    }
-  }
-
-  // Continuously replenish asteroids to maintain level target count.
-  // This fixes the drought after Level 11 where destroyed asteroids were
-  // never replaced (levelUp only spawns on level-change, not every tick).
-  {
-    const targetCount = getLevelConfig(currentLevel).count;
-    while (asteroids.length < targetCount) spawnAsteroid();
-  }
+  // levelUp() only spawns on level-change; replenish here so shots never drain the field
+  const targetCount = getLevelConfig(currentLevel).count;
+  while (asteroids.length < targetCount) spawnAsteroid();
 
   render();
 }

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bombay Asteroids — Admin Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="../charts.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@700&display=swap');
 
@@ -287,8 +288,6 @@ const DASHBOARD_VERSION = 'v1.4';
 document.getElementById('dash-ver').textContent = DASHBOARD_VERSION;
 document.getElementById('page-date').textContent = new Date().toLocaleDateString('en-IN', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
 
-const BASE = 'https://bombay-asteroids-1028845604936.europe-west1.run.app/api/admin?key=';
-
 let allScores = [];
 let sortCol   = 'rank';
 let sortDir   = 'asc';
@@ -301,12 +300,6 @@ const LIGHT_CHART = {
   }
 };
 
-function getKey()    { return sessionStorage.getItem('ba_admin_key') || ''; }
-function promptKey() {
-  const k = prompt('Enter admin key:');
-  if (k) { sessionStorage.setItem('ba_admin_key', k); return k; }
-  return null;
-}
 
 // Heat color: green → yellow → red (light-bg friendly)
 function heatColor(t) {
@@ -371,7 +364,7 @@ async function load() {
   let key = getKey();
   if (!key) { key = promptKey(); if (!key) return; }
   try {
-    const res = await fetch(BASE + key);
+    const res = await fetch(BA_API + key);
     if (res.status === 401) {
       sessionStorage.removeItem('ba_admin_key');
       document.getElementById('status').textContent = 'Wrong key. Refresh to try again.';
@@ -390,31 +383,7 @@ function render(data) {
   allScores = data.scores || [];
   document.getElementById('status').style.display = 'none';
 
-  // Death heatmap data
-  const lvCounts = {};
-  allScores.forEach(r => { const lv=r.level||0; if(lv>0) lvCounts[lv]=(lvCounts[lv]||0)+1; });
-  const maxLv     = Object.keys(lvCounts).length ? Math.max(...Object.keys(lvCounts).map(Number)) : 0;
-  const lvLabels  = Array.from({length:maxLv},(_,i)=>'Lv '+(i+1));
-  const lvData    = Array.from({length:maxLv},(_,i)=>lvCounts[i+1]||0);
-  const maxDeaths = Math.max(...lvData,1);
-  const hardestLv = lvData.length ? lvData.indexOf(Math.max(...lvData))+1 : 0;
-
-  // Daily players
-  const byDay = {};
-  allScores.forEach(r => {
-    const day = r.timestamp?r.timestamp.split(' ')[0]:null; if(!day) return;
-    if(!byDay[day]) byDay[day]=new Set();
-    byDay[day].add((r.name||'').toLowerCase());
-  });
-  const days      = Object.keys(byDay).sort();
-  const dayLabels = days.map(d=>{const[,m,dd]=d.split('-');return `${dd}/${m}`;});
-  const dayCounts = days.map(d=>byDay[d].size);
-  const todayCount= days.length?byDay[days[days.length-1]].size:0;
-
-  // Stats
-  const topScore = allScores.length?allScores[0].score:0;
-  const avg      = allScores.length?Math.round(allScores.reduce((s,r)=>s+r.score,0)/allScores.length):0;
-  const names    = new Set(allScores.map(r=>(r.name||'').toLowerCase())).size;
+  const { lvLabels, lvData, maxDeaths, hardestLv, days, dayLabels, dayCounts, todayCount, topScore, avg, names } = computeData(allScores);
 
   const statsRow = document.getElementById('stats-row');
   statsRow.style.display = 'grid';
