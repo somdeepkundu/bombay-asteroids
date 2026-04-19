@@ -494,11 +494,7 @@ function levelUp(newIdx) {
   showLevelBanner(lvl.label);
   playLevelUp();
   if (lvl.hasLock) scheduleLock();
-  // Gently re-centre on the next Mumbai waypoint — no zoom change, low cost
-  if (map) {
-    const wp = waypointFor(newIdx);
-    map.panTo([wp.lat, wp.lng], { animate: true, duration: 6, easeLinearity: 0.1 });
-  }
+  // Map drifts smoothly on its own 3-second interval — no forced jumps
 }
 
 function showLevelBanner(label) {
