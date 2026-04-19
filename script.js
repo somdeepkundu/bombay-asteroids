@@ -512,7 +512,7 @@ function showLevelBanner(label) {
   }, 1600);
 }
 
-// ── Map drift — runs on its OWN 1-second interval, never inside the game loop ──
+// ── Map drift — runs on its OWN 3-second interval, never inside the game loop ──
 // This means the map can never lag the game, even on the slowest phones.
 function _startMapDrift() {
   setInterval(() => {
@@ -527,14 +527,14 @@ function _startMapDrift() {
       let delta = target - driftAngle;
       while (delta >  Math.PI) delta -= Math.PI * 2;
       while (delta < -Math.PI) delta += Math.PI * 2;
-      driftAngle += delta * 0.25;   // gentle turn per second
+      driftAngle += delta * 0.15;   // gentle turn per interval
     }
-    // 12 px/s — noticeably faster, still smooth
+    // 4 px/interval (≈1.3 px/s) — very subtle drift
     map.panBy(
-      [Math.cos(driftAngle) * 12, Math.sin(driftAngle) * 12],
+      [Math.cos(driftAngle) * 4, Math.sin(driftAngle) * 4],
       { animate: false, noMoveStart: true }
     );
-  }, 1000);   // once per second
+  }, 3000);   // once per 3 seconds
 }
 
 // ── Time-pickup flash on the timer display ───────────
