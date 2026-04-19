@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.2.15";
+const VERSION = "v2.2.16";
 
 // ── Mumbai waypoints — each level lands on a different neighbourhood ──
 const MUMBAI_WAYPOINTS = [
@@ -508,21 +508,11 @@ function showLevelBanner(label) {
   }, 1600);
 }
 
-// ── Map drift — axis-aligned only (pure roll OR pitch each tick) ──
-// Avoids diagonal tile-loading jank. Fires every 1 second off the game loop.
+// ── Map drift — simple southward scroll, constant speed ──
 function _startMapDrift() {
   setInterval(() => {
     if (!map || gameOver || paused) return;
-    const wp = waypointFor(currentLevel);
-    const pt = map.latLngToContainerPoint([wp.lat, wp.lng]);
-    const dx = pt.x - W / 2;
-    const dy = pt.y - H / 2;
-    // Move only on the dominant axis — pure horizontal OR vertical, never diagonal
-    if (Math.abs(dx) >= Math.abs(dy)) {
-      map.panBy([Math.sign(dx) * 4, 0], { animate: false, noMoveStart: true });
-    } else {
-      map.panBy([0, Math.sign(dy) * 4], { animate: false, noMoveStart: true });
-    }
+    map.panBy([0, 4], { animate: false, noMoveStart: true });
   }, 1000);
 }
 
