@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.3.6";
+const VERSION = "v2.3.5b";
 
 // ── Mumbai waypoints — each level lands on a different neighbourhood ──
 const MUMBAI_WAYPOINTS = [
@@ -566,10 +566,11 @@ function showLevelBanner(label) {
 
 // ── Map drift — simple southward scroll, constant speed ──
 function _startMapDrift() {
+  // Smooth continuous panning: 0.5px every 20ms = 25px/sec
   setInterval(() => {
     if (!map || gameOver || paused) return;
-    map.panBy([0, 25], { animate: true, duration: 1, noMoveStart: true });
-  }, 1000);
+    map.panBy([0, 0.5], { animate: false, noMoveStart: true });
+  }, 20);
 }
 
 // ── Time-pickup flash on the timer display ───────────
