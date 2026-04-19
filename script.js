@@ -5,7 +5,22 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.2.8";
+const VERSION = "v2.2.9";
+
+// ── Mumbai waypoints — each level lands on a different neighbourhood ──
+const MUMBAI_WAYPOINTS = [
+  { name: 'IIT Bombay',       lat: 19.1334, lng: 72.9133 },
+  { name: 'Powai Lake',       lat: 19.1212, lng: 72.9064 },
+  { name: 'Andheri',          lat: 19.1197, lng: 72.8464 },
+  { name: 'Juhu Beach',       lat: 19.0968, lng: 72.8265 },
+  { name: 'Bandra',           lat: 19.0544, lng: 72.8402 },
+  { name: 'Sea Link',         lat: 19.0377, lng: 72.8180 },
+  { name: 'Dharavi',          lat: 19.0434, lng: 72.8554 },
+  { name: 'Lower Parel',      lat: 18.9943, lng: 72.8265 },
+  { name: 'Marine Drive',     lat: 18.9430, lng: 72.8244 },
+  { name: 'Gateway of India', lat: 18.9220, lng: 72.8347 },
+];
+function waypointFor(level) { return MUMBAI_WAYPOINTS[level % MUMBAI_WAYPOINTS.length]; }
 
 // ── Leaderboard API ──────────────────────────────────
 const LEADERBOARD_API = 'https://bombay-asteroids-1028845604936.europe-west1.run.app'; // Google Cloud Run
@@ -149,6 +164,11 @@ function scoreToReachLevel(lvl) {
 let currentLevel = 0;
 let levelTimer   = 0;
 let mapDriftAcc  = 0;
+let driftAngle       = Math.PI / 2;        // current pan direction (radians); starts drifting "south"
+let driftAngleTarget = Math.PI / 2;        // target angle to lerp toward
+let driftChangeTimer = 0;                  // seconds until next wander re-target
+let breathTime       = 0;                  // accumulator for ambient breathing
+let flyingTo         = false;              // true while a flyToWaypoint animation runs
 let map, W, H;
 let playerName   = "Player";
 
@@ -202,8 +222,15 @@ function initMap() {
   W = window.innerWidth;
   H = window.innerHeight;
 
+  const mapEl = document.getElementById('map');
+  if (mapEl) {
+    mapEl.style.transformOrigin = '50% 50%';
+    mapEl.style.willChange      = 'transform';
+  }
+
+  const start = waypointFor(0);
   map = L.map('map', {
-    center: [19.133, 72.914],
+    center: [start.lat, start.lng],
     zoom: 15,
     zoomControl: false,
     attributionControl: true,
@@ -472,6 +499,7 @@ function levelUp(newIdx) {
   showLevelBanner(lvl.label);
   playLevelUp();
   if (lvl.hasLock) scheduleLock();
+  flyToWaypoint(newIdx);
 }
 
 function showLevelBanner(label) {
@@ -485,16 +513,53 @@ function showLevelBanner(label) {
   }, 1600);
 }
 
-// ── Map parallax drift ────────────────────────────────
+// ── Map parallax drift — wanders around Mumbai ────────
 function driftMap(dt) {
-  if (!map) return;
+  if (!map || flyingTo) return;
+
+  // Occasionally pick a new target direction so the camera roams, not just scrolls.
+  driftChangeTimer -= dt;
+  if (driftChangeTimer <= 0) {
+    driftAngleTarget = Math.random() * Math.PI * 2;
+    driftChangeTimer = 7 + Math.random() * 5;   // re-target every 7–12s
+  }
+  // Smoothly lerp current angle toward target (shortest way around the circle)
+  let delta = driftAngleTarget - driftAngle;
+  while (delta >  Math.PI) delta -= Math.PI * 2;
+  while (delta < -Math.PI) delta += Math.PI * 2;
+  driftAngle += delta * Math.min(1, dt * 0.4);
+
   const speed = 18 + currentLevel * 4;
   mapDriftAcc += speed * dt;
   if (mapDriftAcc >= 1) {
-    const dy = Math.floor(mapDriftAcc);
-    map.panBy([0, dy], { animate: false, noMoveStart: true });
-    mapDriftAcc -= dy;
+    const step = Math.floor(mapDriftAcc);
+    const dx   = Math.cos(driftAngle) * step;
+    const dy   = Math.sin(driftAngle) * step;
+    map.panBy([dx, dy], { animate: false, noMoveStart: true });
+    mapDriftAcc -= step;
   }
+}
+
+// ── Ambient breathing — subtle scale pulse on the map ──
+function tickBreath(dt) {
+  const el = document.getElementById('map');
+  if (!el) return;
+  breathTime += dt;
+  const s = 1 + Math.sin(breathTime * 0.35) * 0.015;   // ±1.5%
+  el.style.transform = `scale(${s.toFixed(4)})`;
+}
+
+// ── Level-up: fly to next Mumbai waypoint with a zoom pulse ──
+function flyToWaypoint(level) {
+  if (!map) return;
+  const wp = waypointFor(level);
+  flyingTo = true;
+  map.flyTo([wp.lat, wp.lng], 13, { duration: 1.2, easeLinearity: 0.25 });
+  setTimeout(() => {
+    if (!map) return;
+    map.flyTo([wp.lat, wp.lng], 15, { duration: 1.1, easeLinearity: 0.25 });
+    setTimeout(() => { flyingTo = false; }, 1200);
+  }, 1300);
 }
 
 // ── Time-pickup flash on the timer display ───────────
@@ -628,6 +693,7 @@ function tick(ts) {
   moveShots(dt);
   movePowerups(dt);
   driftMap(dt);
+  tickBreath(dt);
 
   const newLevel = getLevelIndex(points);
   if (newLevel > currentLevel) levelUp(newLevel);
