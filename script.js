@@ -529,9 +529,9 @@ function _startMapDrift() {
       while (delta < -Math.PI) delta += Math.PI * 2;
       driftAngle += delta * 0.25;   // gentle turn per second
     }
-    // 3 px/s — barely perceptible, very smooth
+    // 12 px/s — noticeably faster, still smooth
     map.panBy(
-      [Math.cos(driftAngle) * 3, Math.sin(driftAngle) * 3],
+      [Math.cos(driftAngle) * 12, Math.sin(driftAngle) * 12],
       { animate: false, noMoveStart: true }
     );
   }, 1000);   // once per second
