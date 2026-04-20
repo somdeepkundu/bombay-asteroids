@@ -757,6 +757,14 @@ function tick(ts) {
 
 // ── Leaderboard API ─────────────────────────────────
 async function saveToLeaderboard(name, score) {
+  // Block test/dummy entries from being saved
+  const blockedNames = ['pilot', 'testpilot', 'test', 'claude', 'sk'];
+  if (blockedNames.includes(name.toLowerCase())) {
+    console.log('⚠️ Test entry blocked: ' + name);
+    loadLeaderboard();
+    return;
+  }
+
   try {
     const response = await fetch(`${LEADERBOARD_API}/api/score`, {
       method: 'POST',
