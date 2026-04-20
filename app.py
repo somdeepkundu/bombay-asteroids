@@ -26,11 +26,17 @@ html = (base / "index.html").read_text(encoding="utf-8")
 css  = (base / "style.css").read_text(encoding="utf-8")
 js   = (base / "script.js").read_text(encoding="utf-8")
 
-# Convert each SVG asset to a base64 data URI so relative paths work inside the iframe
+# Convert SVG assets to base64 data URIs
 def svg_uri(rel_path: str) -> str:
     data = (base / rel_path).read_bytes()
     b64  = base64.b64encode(data).decode()
     return f"data:image/svg+xml;base64,{b64}"
+
+# Convert audio assets to base64 data URIs
+def audio_uri(rel_path: str) -> str:
+    data = (base / rel_path).read_bytes()
+    b64  = base64.b64encode(data).decode()
+    return f"data:audio/mpeg;base64,{b64}"
 
 asset_map = {
     "assets/graphics/spaceship_full.svg":   svg_uri("assets/graphics/spaceship_full.svg"),
@@ -38,6 +44,7 @@ asset_map = {
     "assets/graphics/asteroid2.svg":        svg_uri("assets/graphics/asteroid2.svg"),
     "assets/graphics/green_projectile.svg": svg_uri("assets/graphics/green_projectile.svg"),
     "assets/graphics/explosion.svg":        svg_uri("assets/graphics/explosion.svg"),
+    "assets/audio/game_table1.mp3":         audio_uri("assets/audio/game_table1.mp3"),
 }
 
 # Replace asset paths in JS with inline data URIs
