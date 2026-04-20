@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.3.6";
+const VERSION = "v2.3.7";
 
 // ── Mumbai waypoints — each level lands on a different neighbourhood ──
 const MUMBAI_WAYPOINTS = [
@@ -950,24 +950,24 @@ function showIntro(name, onComplete) {
 
   // Story lines — %NAME% replaced with player's name
   const lines = [
-    'July 17, 2027.',
+    '17 JULY 2027 — 03:47 UTC',
         '',
-        'The sky broke. Ancient, billion-year-old stone,',
-        'silent for eons, screamed into the atmosphere.',
-        'Earth wasn\'t ready.',
+        'The asteroids came without warning.',
+        'They fell toward Earth like a verdict already written.',
         '',
-        'Mumbai. The City of Dreams—now a city of shadows.',
-        'Over 2.2 crore lives held their breath.',
-        'From the salt-sprayed nets of Versova',
-        'to the pulsing rhythm of Dharavi,',
-        'every eye turned upward.',
+        'Mumbai holds its breath. 2.2 crore souls.',
+        'From Bandra\'s glittering towers to Dharavi\'s beating heart,',
+        'everyone looks up. Everyone prays.',
         '',
-        'The city doesn\'t need a hero.',
-        'It needs a miracle.',
+        'You are %NAME%. A pilot. A name barely remembered.',
+        'Your spaceship—the only shield between the city and oblivion.',
         '',
-        'You are %NAME%.',
-        'A pilot suspended in the dead space between',
-        'a crushing fate and 22 million souls.',
+        'But time is cruel. Time is the enemy.',
+        'You have 52 seconds per level before everything resets.',
+        'No second chances. No marathon. No mercy.',
+        '',
+        'The asteroids never stop.',
+        'Can you?',
   ];
 
   const fullText = lines.join('\n');
