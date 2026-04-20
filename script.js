@@ -903,7 +903,19 @@ function endGame(reason) {
     </div>
     <div class="gameover-credit">Developed by Somdeep Kundu &middot; @RuDRA Lab, C-TARA, IITB</div>
     <div class="gameover-source">learned from &ldquo;Problem Solving with Abstraction&rdquo; by Programming 2.0 (YouTube)</div>
-    <div style="color: rgba(255, 255, 255, 0.4); font-size: 9px; letter-spacing: 0.5px; margin-top: 6px;">Tabla music: Soumyadip Ghosh</div>
+    
+    <div style="margin-top: 10px;">
+        <div style="color: rgba(255, 255, 255, 0.4); font-size: 10px; letter-spacing: 0.5px;">
+            Tabla music: <span style="font-size: 14px; color: white; font-weight: bold;">Soumyadip Ghosh</span>
+        </div>
+        <div style="color: rgba(255, 255, 255, 0.4); font-size: 10px; margin-top: 4px;">
+            Somdeep's Website: <a href="http://www.somdeepkundu.in" target="_blank" style="color: var(--neon-cyan); text-decoration: none;">www.somdeepkundu.in</a>
+        </div>
+        <div style="color: rgba(255, 255, 255, 0.4); font-size: 10px; margin-top: 4px;">
+            Games current version's <a href="https://github.com/somdeepkundu/bombay-asteroids" target="_blank" style="color: var(--neon-cyan); text-decoration: none;">GitHub Repository</a>
+        </div>
+    </div>
+
     <button class="restart-btn" onclick="location.reload()">PLAY AGAIN</button>
   `;
   document.body.appendChild(div);
