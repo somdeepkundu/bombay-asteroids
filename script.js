@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.3.8";
+const VERSION = "v2.3.9";
 
 // ── Mumbai waypoints — each level lands on a different neighbourhood ──
 const MUMBAI_WAYPOINTS = [
@@ -374,27 +374,49 @@ function moveShip(dt) {
 
 // ── Asteroids ─────────────────────────────────────────
 const asteroids = [];
+let _asteroidPool = [];
+let _poolSize = 100;
+
+// Pre-create asteroid marker pool at game start
+function initAsteroidPool() {
+  for (let i = 0; i < _poolSize; i++) {
+    const marker = L.marker(px(-500, -500), {
+      icon: L.divIcon({ className: '', html: '<div></div>', iconSize: [50, 50], iconAnchor: [25, 25] }),
+      interactive: false,
+    }).addTo(map);
+    _asteroidPool.push({ marker, active: false });
+  }
+}
 
 function spawnAsteroid(opts = {}) {
   const src  = Math.random() < 0.5 ? ASSETS.asteroid1 : ASSETS.asteroid2;
   const lvl  = getLevelConfig(currentLevel);
   const size = opts.size || 'large';
   const dim  = size === 'large' ? 50 : 28;
-  const obj  = {
+
+  // Reuse from pool or create new if pool exhausted
+  let pooledMarker = _asteroidPool.find(p => !p.active);
+  if (!pooledMarker) {
+    pooledMarker = { marker: L.marker(px(-500, -500), { icon: L.divIcon({ className: '', html: '<div></div>', iconSize: [dim, dim], iconAnchor: [dim/2, dim/2] }), interactive: false }).addTo(map), active: false };
+    _asteroidPool.push(pooledMarker);
+  }
+
+  const obj = {
     x:    opts.x  !== undefined ? opts.x  : Math.random() * W,
     y:    opts.y  !== undefined ? opts.y  : -30,
     w: dim, h: dim, size,
     s:    opts.s  !== undefined ? opts.s  : Math.random() * (lvl.speedMax - lvl.speedMin) + lvl.speedMin,
     vx:   opts.vx !== undefined ? opts.vx : (Math.random() * 2 - 1) * lvl.vxMax,
+    marker: pooledMarker.marker,
+    pooled: true,
   };
-  obj.marker = L.marker(px(obj.x, obj.y), {
-    icon: L.divIcon({
-      className: '',
-      html: `<img src="${src}" width="${dim}" height="${dim}" class="asteroid-spin" style="display:block;filter:drop-shadow(0 0 6px rgba(255,80,80,0.5))">`,
-      iconSize: [dim, dim], iconAnchor: [dim/2, dim/2],
-    }),
-    interactive: false,
-  }).addTo(map);
+
+  // Update marker HTML and position
+  const html = `<img src="${src}" width="${dim}" height="${dim}" class="asteroid-spin" style="display:block;filter:drop-shadow(0 0 6px rgba(255,80,80,0.5))">`;
+  obj.marker.setIcon(L.divIcon({ className: '', html, iconSize: [dim, dim], iconAnchor: [dim/2, dim/2] }));
+  obj.marker.setLatLng(px(obj.x, obj.y));
+
+  pooledMarker.active = true;
   asteroids.push(obj);
 }
 
@@ -675,7 +697,9 @@ function tickShotCollisions() {
         points += a.size === 'large' ? 20 : 15;
         explodeAt(a.x, a.y);
       }
-      map.removeLayer(a.marker);
+      // Return to pool instead of destroying
+      a.marker.setLatLng(px(-500, -500));
+      _asteroidPool.find(p => p.marker === a.marker).active = false;
       asteroids.splice(j, 1);
       removeShot(shot);
       break;
@@ -1065,6 +1089,7 @@ function launchGame() {
 
   initMap();
   map.whenReady(() => {
+    initAsteroidPool();  // Pre-allocate asteroid markers
     initShip();
     levelTimer = getLevelConfig(0).timeLimit;
     for (let i = 0; i < getLevelConfig(0).count; i++) spawnAsteroid();
