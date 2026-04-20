@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.3.7";
+const VERSION = "v2.3.8";
 
 // ── Mumbai waypoints — each level lands on a different neighbourhood ──
 const MUMBAI_WAYPOINTS = [
@@ -526,13 +526,12 @@ function render() {
   for (const s of shots)     s.marker.setLatLng(px(s.x, s.y));
   for (const p of powerups)  p.marker.setLatLng(px(p.x, p.y));
 
-  document.getElementById('number').textContent = String(points).padStart(3, '0');
-  document.getElementById('healthbar').style.width = `${Math.max(ship.hl, 0)}%`;
-  document.getElementById('level-indicator').textContent = getLevelConfig(currentLevel).label;
-  const secs    = Math.ceil(Math.max(levelTimer, 0));
-  const timerEl = document.getElementById('timer-number');
-  timerEl.textContent = secs;
-  timerEl.parentElement.classList.toggle('urgent', secs <= 10);
+  _elNumber.textContent        = String(points).padStart(3, '0');
+  _elHealthbar.style.width     = `${Math.max(ship.hl, 0)}%`;
+  _elLevelIndicator.textContent = getLevelConfig(currentLevel).label;
+  const secs = Math.ceil(Math.max(levelTimer, 0));
+  _elTimerNumber.textContent   = secs;
+  _elTimer.classList.toggle('urgent', secs <= 10);
 }
 
 // ── Difficulty progression ────────────────────────────
@@ -566,11 +565,11 @@ function showLevelBanner(label) {
 
 // ── Map drift — simple southward scroll, constant speed ──
 function _startMapDrift() {
-  // Smooth continuous panning: 0.5px every 20ms = 25px/sec
+  // 500ms interval = 2x/sec — much lighter on low-end phones
   setInterval(() => {
     if (!map || gameOver || paused) return;
-    map.panBy([0, 0.5], { animate: false, noMoveStart: true });
-  }, 20);
+    map.panBy([0, 12], { animate: true, duration: 0.5, noMoveStart: true });
+  }, 500);
 }
 
 // ── Time-pickup flash on the timer display ───────────
@@ -585,6 +584,9 @@ function showTimePulse() {
 let points = 0, gameOver = false, lastTime = 0;
 let paused = false, pauseUsed = false;
 let shipShielded = false, shieldTimer = 0;
+
+// ── Cached DOM refs (set once on game start, reused every frame) ──
+let _elNumber, _elHealthbar, _elLevelIndicator, _elTimerNumber, _elTimer;
 let personalBest = parseInt(localStorage.getItem('bombay_asteroids_best') || '0');
 
 // ── Tick sub-steps (extracted from game loop) ────────
@@ -681,12 +683,17 @@ function tickShotCollisions() {
   }
 }
 
+const _isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+const _fpsLimit  = _isMobile ? 1000 / 30 : 1000 / 60; // 30fps mobile, 60fps desktop
+
 function tick(ts) {
   if (gameOver || paused) return;
   requestAnimationFrame(tick);
 
   if (lastTime === 0) { lastTime = ts; return; }
-  const dt = Math.min((ts - lastTime) / 1000, 0.1);
+  const elapsed = ts - lastTime;
+  if (elapsed < _fpsLimit) return;   // skip frame if too soon
+  const dt = Math.min(elapsed / 1000, 0.1);
   lastTime = ts;
 
   levelTimer -= dt;
@@ -1048,6 +1055,13 @@ function startGame() {
 function launchGame() {
   document.addEventListener('keydown', keypressHandler);
   document.addEventListener('keyup',   keypressHandler);
+
+  // Cache DOM refs once — avoids getElementById every frame
+  _elNumber        = document.getElementById('number');
+  _elHealthbar     = document.getElementById('healthbar');
+  _elLevelIndicator = document.getElementById('level-indicator');
+  _elTimerNumber   = document.getElementById('timer-number');
+  _elTimer         = document.getElementById('timer');
 
   initMap();
   map.whenReady(() => {
