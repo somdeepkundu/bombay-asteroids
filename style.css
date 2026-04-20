@@ -274,6 +274,33 @@ body {
   color: #ffffff;
 }
 
+/* ── Mobile responsive ────────────────────────────── */
+@media (max-width: 600px) {
+  .gameover-title {
+    font-size: 28px;
+    letter-spacing: 2px;
+  }
+
+  .restart-btn {
+    font-size: 13px;
+    padding: 10px 24px;
+    letter-spacing: 1px;
+  }
+
+  #gameover {
+    padding: 15px;
+    gap: 12px;
+  }
+
+  .gameover-credit {
+    font-size: 11px;
+  }
+
+  .gameover-source {
+    font-size: 9px;
+  }
+}
+
 @keyframes gameover-pulse {
   0%, 100% { opacity: 1;    transform: scale(1);    }
   50%       { opacity: 0.75; transform: scale(1.04); }
