@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.3.5b";
+const VERSION = "v2.3.6";
 
 // ── Mumbai waypoints — each level lands on a different neighbourhood ──
 const MUMBAI_WAYPOINTS = [
@@ -872,6 +872,7 @@ function endGame(reason) {
     </div>
     <div class="gameover-credit">Developed by Somdeep Kundu &middot; @RuDRA Lab, C-TARA, IITB</div>
     <div class="gameover-source">learned from &ldquo;Problem Solving with Abstraction&rdquo; by Programming 2.0 (YouTube)</div>
+    <div style="color: rgba(255, 255, 255, 0.4); font-size: 9px; letter-spacing: 0.5px; margin-top: 6px;">Tabla music: Soumyadip Ghosh</div>
     <button class="restart-btn" onclick="location.reload()">PLAY AGAIN</button>
   `;
   document.body.appendChild(div);
