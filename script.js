@@ -910,7 +910,7 @@ function endGame(reason) {
       <div id="leaderboard-list" style="max-height: 180px; overflow-y: auto; font-size: 12px;"><div style="color:#445;font-size:11px;padding:8px 0">Loading scores...</div></div>
     </div>
     <div class="gameover-credit">Developed by Somdeep Kundu &middot; @RuDRA Lab, C-TARA, IITB</div>
-    <div class="gameover-source">learned from &ldquo;Problem Solving with Abstraction&rdquo; by Programming 2.0 (YouTube)</div>
+    <div class="gameover-source">learned from &ldquo;Problem Solving with Abstraction&rdquo; by Programming 2.0 (<a href="https://youtu.be/eyx25adnN6A?si=u5WIiZWgkfgUVVrG" target="_blank" style="color: var(--neon-cyan); text-decoration: none;">YouTube</a>)</div>
     
     <div style="margin-top: 10px;">
         <div style="color: rgba(255, 255, 255, 0.4); font-size: 10px; letter-spacing: 0.5px;">
