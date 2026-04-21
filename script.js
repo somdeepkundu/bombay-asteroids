@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.3.9";
+const VERSION = "v2 LTR";
 
 // ── Mumbai waypoints — each level lands on a different neighbourhood ──
 const MUMBAI_WAYPOINTS = [
@@ -1001,23 +1001,16 @@ function showIntro(name, onComplete) {
 
   // Story lines — %NAME% replaced with player's name
   const lines = [
-    '17 JULY 2027 — 03:47 UTC',
-        '',
-        'The asteroids came without warning.',
-        'They fell toward Earth like a verdict already written.',
-        '',
-        'Mumbai holds its breath. 2.2 crore souls.',
-        'From Bandra\'s glittering towers to Dharavi\'s beating heart,',
-        'everyone looks up. Everyone prays.',
-        '',
-        'You are %NAME%. A pilot. A name barely remembered.',
-        'Your spaceship—the only shield between the city and oblivion.',
-        '',
-        'But REMEMBER in this kind of situation, you might have intent, but time is cruel. Time is the enemy.',
-        '',
-        'The asteroids never stop.',
-        'Can you?',
-  ];
+      '22nd APRIL 2026 — 03:03 PM',
+      '',
+      'The [Lyrid meteors](https://doi.org/10.1016/j.pss.2023.105803) were just a warning.',
+      'Now fall ancient rocks, older than the sun and earth.',
+      '',
+      'Mumbai holds its breath. 2.2 crore souls.',
+      '',
+      'The space agency was ready. They just needed a brave pilot.',
+      'You are %NAME%. Hold the line.'
+];
 
   const fullText = lines.join('\n');
   let i = 0;
