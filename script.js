@@ -1001,15 +1001,15 @@ function showIntro(name, onComplete) {
 
   // Story lines — %NAME% replaced with player's name
 const lines = [
-  '22nd APRIL 2026 — 03:03 PM',
-  '',
-  'The <a href="https://doi.org/10.1016/j.pss.2023.105803" target="_blank" style="color: #00ffff; text-decoration: underline;">Lyrid meteors shower</a> were just a warning from Astrophysicists.',
-  'Now fall ancient rocks, older than the sun and earth.',
-  '',
-  'Mumbai holds its breath. 2.2 crore souls.',
-  '',
-  'Indian space agency is ready. They just needed a brave pilot.',
-  'You are Caption %NAME%. Hold the line.'
+        '22nd APRIL 2026 — 03:03 PM',
+        '',
+        'The <a href="https://doi.org/10.1016/j.pss.2023.105803" target="_blank" style="color: #00ffff; text-decoration: underline;">Lyrid meteor shower</a> was a false alarm.',
+        'Warning: Multiple primordial targets entering airspace. Intercept immediately.',
+        '',
+        'Mumbai holds its breath. 2.2 crore souls.',
+        '',
+        'Indian space agency is ready. They just needed a brave pilot.',
+        'Imagine you are Wing Commander %NAME%. Hold the line.'
 ];
 
   const fullText = lines.join('\n');
