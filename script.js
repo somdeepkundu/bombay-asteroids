@@ -1000,15 +1000,15 @@ function showIntro(name, onComplete) {
   screen.classList.add('visible');
 
   // Story lines — %NAME% replaced with player's name
-  const lines = [
+const lines = [
       '22nd APRIL 2026 — 03:03 PM',
       '',
-      'The [Lyrid meteors](https://doi.org/10.1016/j.pss.2023.105803) were just a warning.',
+      'The <a href="https://doi.org/10.1016/j.pss.2023.105803" target="_blank">Lyrid meteors</a> were just a warning.',
       'Now fall ancient rocks, older than the sun and earth.',
       '',
       'Mumbai holds its breath. 2.2 crore souls.',
       '',
-      'The space agency was ready. They just needed a brave pilot.',
+      'Indian space agency is ready. They just needed a brave pilot.',
       'You are %NAME%. Hold the line.'
 ];
 
