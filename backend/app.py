@@ -9,10 +9,19 @@ from flask_cors import CORS
 from google.cloud import firestore
 from datetime import datetime, timezone, timedelta
 
+
 IST = timezone(timedelta(hours=5, minutes=30))
 
+
 app = Flask(__name__)
-CORS(app)
+# CORS(app)  ////////////////////////////////////
+CORS(app, origins=[ # <--- ADD THESE TWO LINES
+    "https://bombay-asteroids.streamlit.app",
+    "https://somdeepkundu.github.io"
+    # If you run it locally, you can also add "http://localhost:8000" temporarily
+]) # <--- AND THIS LINE
+
+# --- (the rest of your Flask routes and logic go here) ---
 
 ADMIN_KEY = 'sRxMAdjR7-n9Doq1YFkppw'
 
