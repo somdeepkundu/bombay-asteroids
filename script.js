@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.1.4.2 LTR";
+const VERSION = "v2.1.5 LTR";
 
 // ── Mumbai waypoints — each level lands on a different neighbourhood ──
 const MUMBAI_WAYPOINTS = [
