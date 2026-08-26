@@ -18,10 +18,24 @@ body {
 #map {
   width: 100vw;
   height: 100vh;
+  position: relative;
+  z-index: 0;
 }
 
 .leaflet-container {
-  filter: brightness(0.4) contrast(1.2) !important;
+  z-index: 1 !important;
+}
+
+#map::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  z-index: 2;
 }
 
 .leaflet-container:focus { outline: none; }
