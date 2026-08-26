@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2 LTR";
+const VERSION = "v2.1 LTR";
 
 // ── Mumbai waypoints — each level lands on a different neighbourhood ──
 const MUMBAI_WAYPOINTS = [
@@ -293,7 +293,7 @@ function initMap() {
     keyboard: false,
   });
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
     attribution:
       '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> ' +
       '&copy; <a href="https://carto.com/attributions">CARTO</a>',
