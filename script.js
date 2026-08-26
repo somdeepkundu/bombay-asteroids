@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.1.6.1 LTR";
+const VERSION = "v2.1.6.2 LTR";
 
 // ── Mumbai waypoints — each level lands on a different neighbourhood ──
 const MUMBAI_WAYPOINTS = [
@@ -228,8 +228,8 @@ const AUTO_FIRE_INTERVAL = 0.18;   // seconds between shots when held
 let autoFireTimer = 0;
 
 // ── Waypoint animation timing ──────────────────────
-const WAYPOINT_ANIMATION_DURATION = 4;  // seconds (for Leaflet flyTo)
-const WAYPOINT_DRIFT_RESUME_DELAY = 4200;  // milliseconds (200ms buffer after animation)
+const WAYPOINT_ANIMATION_DURATION = 8;  // seconds (for Leaflet flyTo)
+const WAYPOINT_DRIFT_RESUME_DELAY = 8200;  // milliseconds (200ms buffer after animation)
 let levelUpTimeoutId = null;  // Track timeout to cancel on rapid level-ups
 
 // ── Roll / Pitch lock ─────────────────────────────────
