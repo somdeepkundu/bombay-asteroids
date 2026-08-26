@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.1.4.1 LTR";
+const VERSION = "v2.1.4.2 LTR";
 
 // ── Mumbai waypoints — each level lands on a different neighbourhood ──
 const MUMBAI_WAYPOINTS = [
@@ -574,8 +574,8 @@ function levelUp(newIdx) {
   const waypoint = waypointFor(currentLevel);
   if (map) {
     driftPaused = true;
-    map.flyTo([waypoint.lat, waypoint.lng], 15, { duration: 1 });
-    setTimeout(() => { driftPaused = false; }, 1200); // Resume drift after animation
+    map.flyTo([waypoint.lat, waypoint.lng], 15, { duration: 4 });
+    setTimeout(() => { driftPaused = false; }, 4200); // Resume drift after animation
   }
 }
 
