@@ -570,7 +570,9 @@ function levelUp(newIdx) {
   showLevelBanner(lvl.label);
   playLevelUp();
   if (lvl.hasLock) scheduleLock();
-  // Map drifts smoothly on its own 3-second interval — no forced jumps
+  // Center map on waypoint for this level
+  const waypoint = waypointFor(currentLevel);
+  if (map) map.setView([waypoint.lat, waypoint.lng], 15, { animate: true, duration: 1 });
 }
 
 function showLevelBanner(label) {
