@@ -70,7 +70,7 @@ A browser-based shoot'em'up built with **vanilla HTML, CSS, and JavaScript** —
 
 ### 🎮 Core Gameplay
 - **Infinite procedural difficulty** — no level ceiling; each level increases asteroid count, speed, and chaos
-- **Leaflet.js map background** — world centered on Mumbai / IIT Bombay with real-time parallax drift
+- **Leaflet.js map background** — world centered on Mumbai / IIT Bombay with real-time parallax drift (OpenTopoMap tiles, no API key required)
 - **Delta-time physics** — smooth movement at any frame rate
 - **Circle collision detection** — distance-based for ship↔asteroid and shot↔asteroid
 - **Splitting asteroids** — from Level 8 onwards, large rocks (50 px) shatter into 2 fast smalls (28 px) · +10 pts per split, +15 pts per small destroyed
@@ -215,16 +215,7 @@ bombay-asteroids/
 | v2.0 | Leaflet map, procedural difficulty, powerups |
 | v2.1.0 | Time booster, analog joystick, auto-fire (Lv 10+), roll/pitch locks |
 | v2.1.1 | Web Audio API sound effects (5 sounds, zero files) |
-| v2.1.2 | Collision alert sound, persistent player name |
-| v2.1.3 | Global leaderboard — Flask + Cloud Run + Firestore |
-| v2.1.4 | Cinematic intro story (first visit only, typewriter effect) |
-| v2.2.0 | Mobile layout overhaul — fixed joystick, FIRE, mute positions |
-| v2.2.1 | Score metadata — date (dd/mm), time (IST), version |
-| v2.2.2 | Profanity filter · Admin dashboard · Firestore migration |
-| v2.2.3 | Personal best · Shield powerup · Splitting asteroids · WhatsApp/Instagram share · One-use pause · PWA · Level transition |
-| v2.2.4 | Fix asteroid drought after Lv 11 · Split gated to Lv 8 · Stronger shield glow · Compact level banner |
-| v2.2.5 | Analytics — death heatmap & daily active players · Level tracked per score |
-| v2.2.6 | Shield glow performance fix (2 shadow layers, no per-frame stutter) |
+| v2.1.2 LTR | Map tile provider fix — switched to OpenTopoMap (no API key), improved HUD/FIRE button visibility with stronger text shadows & backgrounds |
 
 ---
 
@@ -255,7 +246,7 @@ Started from [programming2point0/asteroids](https://github.com/programming2point
 - **Tutorial by**: [Programming 2.0](https://www.youtube.com/@programming2point0) (YouTube)
 - **Base repo**: [programming2point0/asteroids](https://github.com/programming2point0/asteroids)
 - **Graphics**: [FreePik](https://www.freepik.com/) — asteroids, spaceship, projectile, explosion
-- **Map tiles**: [CARTO](https://carto.com/) dark tiles via [Leaflet.js](https://leafletjs.com/)
+- **Map tiles**: [OpenTopoMap](https://opentopomap.org/) via [Leaflet.js](https://leafletjs.com/) (no API key required)
 - **Backend**: [Flask](https://flask.palletsprojects.com/) + [Google Cloud Run](https://cloud.google.com/run) + [Firestore](https://cloud.google.com/firestore)
 
 ---
