@@ -574,7 +574,7 @@ function levelUp(newIdx) {
   const waypoint = waypointFor(currentLevel);
   if (map) {
     driftPaused = true;
-    map.setView([waypoint.lat, waypoint.lng], 15, { animate: true, duration: 2000 });
+    map.flyTo([waypoint.lat, waypoint.lng], 15, { duration: 2 });
     setTimeout(() => { driftPaused = false; }, 2200); // Resume drift after animation
   }
 }
