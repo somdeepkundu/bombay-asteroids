@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.1.6.2 LTR";
+const VERSION = "v2.1.6.3 LTR";
 
 // ── Mumbai waypoints — each level lands on a different neighbourhood ──
 const MUMBAI_WAYPOINTS = [
@@ -1114,7 +1114,12 @@ function launchGame() {
   _elTimerNumber   = document.getElementById('timer-number');
   _elTimer         = document.getElementById('timer');
 
-  initMap();
+  // Defer map init with requestIdleCallback to avoid blocking intro animation
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(() => initMap(), { timeout: 100 });
+  } else {
+    setTimeout(() => initMap(), 100);
+  }
   map.whenReady(() => {
     initAsteroidPool();  // Pre-allocate asteroid markers
     initShip();
