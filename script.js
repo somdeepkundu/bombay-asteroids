@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.1.5 LTR";
+const VERSION = "v2.1.6 LTR";
 
 // ── Mumbai waypoints — each level lands on a different neighbourhood ──
 const MUMBAI_WAYPOINTS = [
@@ -226,6 +226,11 @@ let playerName   = "Player";
 // ── Auto-fire ─────────────────────────────────────────
 const AUTO_FIRE_INTERVAL = 0.18;   // seconds between shots when held
 let autoFireTimer = 0;
+
+// ── Waypoint animation timing ──────────────────────
+const WAYPOINT_ANIMATION_DURATION = 4;  // seconds (for Leaflet flyTo)
+const WAYPOINT_DRIFT_RESUME_DELAY = 4200;  // milliseconds (200ms buffer after animation)
+let levelUpTimeoutId = null;  // Track timeout to cancel on rapid level-ups
 
 // ── Roll / Pitch lock ─────────────────────────────────
 let lockAxis            = null;    // 'x' | 'y' | null
@@ -574,8 +579,11 @@ function levelUp(newIdx) {
   const waypoint = waypointFor(currentLevel);
   if (map) {
     driftPaused = true;
-    map.flyTo([waypoint.lat, waypoint.lng], 15, { duration: 4 });
-    setTimeout(() => { driftPaused = false; }, 4200); // Resume drift after animation
+    // Cancel any previous level-up animation timeout to prevent overlapping state changes
+    if (levelUpTimeoutId !== null) clearTimeout(levelUpTimeoutId);
+    map.flyTo([waypoint.lat, waypoint.lng], 15, { duration: WAYPOINT_ANIMATION_DURATION });
+    // 200ms buffer ensures drift resumes after flyTo animation fully completes
+    levelUpTimeoutId = setTimeout(() => { driftPaused = false; }, WAYPOINT_DRIFT_RESUME_DELAY);
   }
 }
 
@@ -596,7 +604,7 @@ function _startMapDrift() {
   // 500ms interval = 2x/sec — much lighter on low-end phones
   setInterval(() => {
     if (!map || gameOver || paused || driftPaused) return;
-    map.panBy([0, 12], { animate: true, duration: 0.5, noMoveStart: true });
+    map.panBy([0, 12], { animate: true, duration: 0.5, noMoveStart: true }); // duration: 0.5 seconds
   }, 500);
 }
 
