@@ -293,12 +293,11 @@ function initMap() {
     keyboard: false,
   });
 
-  L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.png', {
+  L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
     attribution:
-      'Map tiles by <a href="http://stamen.com">Stamen Design</a>, ' +
-      'under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. ' +
-      'Data by <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
-    maxZoom: 20,
+      'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
+      'SRTM | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a>',
+    maxZoom: 17,
   }).addTo(map);
 }
 
