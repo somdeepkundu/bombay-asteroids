@@ -596,9 +596,9 @@ body {
   align-items: center;
   justify-content: center;
   background: radial-gradient(ellipse at center,
-    rgba(0, 30, 60, 0.3) 0%,
-    rgba(0, 0, 0, 0.5) 70%);
-  backdrop-filter: blur(3px);
+    rgba(0, 30, 60, 0.65) 0%,
+    rgba(0, 0, 0, 0.85) 70%);
+  backdrop-filter: blur(8px);
   z-index: 3000;
 }
 
