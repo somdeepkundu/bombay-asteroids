@@ -78,6 +78,26 @@ body {
   to   { opacity: 0; transform: scale(2.2); }
 }
 
+/* ── GLOW EFFECTS ────────────────────────────────── */
+@keyframes asteroid-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 245, 0.4), 0 0 40px rgba(0, 255, 245, 0.2), inset -2px -2px 8px rgba(0,0,0,0.8); }
+  50% { box-shadow: 0 0 28px rgba(0, 255, 245, 0.6), 0 0 56px rgba(0, 255, 245, 0.3), inset -2px -2px 8px rgba(0,0,0,0.8); }
+}
+
+@keyframes ship-pulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(57, 255, 20, 0.6), 0 0 24px rgba(57, 255, 20, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(57, 255, 20, 0.8), 0 0 40px rgba(57, 255, 20, 0.5); }
+}
+
+@keyframes powerup-shine {
+  0%, 100% { box-shadow: 0 0 16px rgba(255, 214, 10, 0.7), 0 0 32px rgba(255, 149, 0, 0.4), inset -2px -2px 6px rgba(0,0,0,0.4); }
+  50% { box-shadow: 0 0 24px rgba(255, 214, 10, 0.9), 0 0 48px rgba(255, 149, 0, 0.6), inset -2px -2px 6px rgba(0,0,0,0.4); }
+}
+
+.asteroid-glow { animation: asteroid-glow 3s ease-in-out infinite; }
+.ship-glow { animation: ship-pulse 1.5s ease-in-out infinite; }
+.powerup-glow { animation: powerup-shine 0.8s ease-in-out infinite; }
+
 /* ── HUD ──────────────────────────────────────────── */
 #hud {
   position: fixed;

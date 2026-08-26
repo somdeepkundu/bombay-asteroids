@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.1.6 LTR";
+const VERSION = "v2.1.6.1 LTR";
 
 // ── Mumbai waypoints — each level lands on a different neighbourhood ──
 const MUMBAI_WAYPOINTS = [
@@ -346,7 +346,7 @@ function initShip() {
   shipMarker = L.marker(px(ship.x, ship.y), {
     icon: L.divIcon({
       className: '',
-      html: `<img src="${ASSETS.spaceship}" width="60" height="80" style="display:block;filter:drop-shadow(0 0 10px rgba(0,255,245,0.8)) drop-shadow(0 0 22px rgba(0,255,245,0.4))">`,
+      html: `<img src="${ASSETS.spaceship}" width="60" height="80" class="ship-glow" style="display:block">`,
       iconSize: [60, 80],
       iconAnchor: [30, 40],
     }),
@@ -416,7 +416,7 @@ function spawnAsteroid(opts = {}) {
   };
 
   // Update marker HTML and position
-  const html = `<img src="${src}" width="${dim}" height="${dim}" class="asteroid-spin" style="display:block;filter:drop-shadow(0 0 6px rgba(255,80,80,0.5))">`;
+  const html = `<img src="${src}" width="${dim}" height="${dim}" class="asteroid-spin asteroid-glow" style="display:block;border-radius:50%">`;
   obj.marker.setIcon(L.divIcon({ className: '', html, iconSize: [dim, dim], iconAnchor: [dim/2, dim/2] }));
   obj.marker.setLatLng(px(obj.x, obj.y));
 
@@ -478,7 +478,7 @@ function _spawnPowerup(type, svg, cls, c1, c2, speed) {
   obj.marker = L.marker(px(obj.x, obj.y), {
     icon: L.divIcon({
       className: '',
-      html: `<img src="${svg}" width="34" height="34" class="${cls}" style="display:block;filter:drop-shadow(0 0 10px ${c1}) drop-shadow(0 0 20px ${c2})">`,
+      html: `<img src="${svg}" width="34" height="34" class="${cls} powerup-glow" style="display:block;border-radius:4px">`,
       iconSize: [34, 34], iconAnchor: [17, 17],
     }),
     interactive: false, zIndexOffset: 400,
