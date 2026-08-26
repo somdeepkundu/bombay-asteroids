@@ -3,7 +3,7 @@
 A browser-based arcade shooter built with vanilla **HTML, CSS, and JavaScript**. Pilot your spaceship above Mumbai and destroy incoming asteroids!
 
 <p align="center">
-  <strong>🌐 <a href="https://somdeepkundu.github.io/bombay-asteroids/">Play now</a> · <a href="DETAILED.md">Full docs</a></strong>
+  <strong>🌐 <a href="https://somdeepkundu.github.io/bombay-asteroids/">Play now</a> · <a href="DETAILED.md">Full docs</a> · <a href="https://youtu.be/4pejCuZ3O9o?si=mEsXTRPfvT7aIAfH">📹 Watch video</a></strong>
 </p>
 
 ---
