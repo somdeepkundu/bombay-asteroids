@@ -572,7 +572,11 @@ function levelUp(newIdx) {
   if (lvl.hasLock) scheduleLock();
   // Center map on waypoint for this level
   const waypoint = waypointFor(currentLevel);
-  if (map) map.setView([waypoint.lat, waypoint.lng], 15, { animate: true, duration: 2000 });
+  if (map) {
+    driftPaused = true;
+    map.setView([waypoint.lat, waypoint.lng], 15, { animate: true, duration: 2000 });
+    setTimeout(() => { driftPaused = false; }, 2200); // Resume drift after animation
+  }
 }
 
 function showLevelBanner(label) {
@@ -587,10 +591,11 @@ function showLevelBanner(label) {
 }
 
 // ── Map drift — simple southward scroll, constant speed ──
+let driftPaused = false;
 function _startMapDrift() {
   // 500ms interval = 2x/sec — much lighter on low-end phones
   setInterval(() => {
-    if (!map || gameOver || paused) return;
+    if (!map || gameOver || paused || driftPaused) return;
     map.panBy([0, 12], { animate: true, duration: 0.5, noMoveStart: true });
   }, 500);
 }
