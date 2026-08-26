@@ -5,7 +5,7 @@
 //  GitHub Pages repo and it works immediately.
 // ─────────────────────────────────────────────────────
 
-const VERSION = "v2.1.7 LTR";
+const VERSION = "v2.1.8";
 
 // ── Mumbai waypoints — each level lands on a different neighbourhood ──
 const MUMBAI_WAYPOINTS = [
@@ -304,6 +304,19 @@ function initMap() {
       'SRTM | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a>',
     maxZoom: 17,
   }).addTo(map);
+
+  // Initialize game after map is ready
+  map.whenReady(() => {
+    initAsteroidPool();  // Pre-allocate asteroid markers
+    initShip();
+    levelTimer = getLevelConfig(0).timeLimit;
+    for (let i = 0; i < getLevelConfig(0).count; i++) spawnAsteroid();
+    setInterval(spawnHealth,    15000);   // health drop every 15 s
+    setInterval(spawnTimeBoost, 22000);   // time boost every 22 s
+    setInterval(spawnShield,    35000);   // shield drop every 35 s
+    _startMapDrift();
+    requestAnimationFrame(tick);
+  });
 }
 
 function px(x, y) {
@@ -1115,22 +1128,12 @@ function launchGame() {
   _elTimer         = document.getElementById('timer');
 
   // Defer map init with requestIdleCallback to avoid blocking intro animation
+  // Game initialization happens inside initMap() via map.whenReady()
   if ('requestIdleCallback' in window) {
     requestIdleCallback(() => initMap(), { timeout: 100 });
   } else {
     setTimeout(() => initMap(), 100);
   }
-  map.whenReady(() => {
-    initAsteroidPool();  // Pre-allocate asteroid markers
-    initShip();
-    levelTimer = getLevelConfig(0).timeLimit;
-    for (let i = 0; i < getLevelConfig(0).count; i++) spawnAsteroid();
-    setInterval(spawnHealth,    15000);   // health drop every 15 s
-    setInterval(spawnTimeBoost, 22000);   // time boost every 22 s
-    setInterval(spawnShield,    35000);   // shield drop every 35 s
-    _startMapDrift();
-    requestAnimationFrame(tick);
-  });
 }
 
 window.addEventListener('load', () => {
