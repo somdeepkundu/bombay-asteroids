@@ -572,7 +572,7 @@ function levelUp(newIdx) {
   if (lvl.hasLock) scheduleLock();
   // Center map on waypoint for this level
   const waypoint = waypointFor(currentLevel);
-  if (map) map.setView([waypoint.lat, waypoint.lng], 15, { animate: true, duration: 1 });
+  if (map) map.setView([waypoint.lat, waypoint.lng], 15, { animate: true, duration: 2000 });
 }
 
 function showLevelBanner(label) {
